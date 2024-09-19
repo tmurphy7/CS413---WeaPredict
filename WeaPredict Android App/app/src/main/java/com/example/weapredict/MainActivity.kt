@@ -1,7 +1,5 @@
 package com.example.weapredict
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,13 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.app.ActivityCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.example.weapredict.LocationFinder
 
 class MainActivity : ComponentActivity() {
 
@@ -25,15 +23,25 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Connect app to Fused Location Provider API
+
+        // Google Play service used to get location data
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        // TODO: Add function to actually retrieve location
+
+        // Create the UI
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                    // String will update automatically once location is returned
+                    var locationString by remember { mutableStateOf("Fetching location...") }
+
+                    // Returns the location of the user when available
+                    LocationFinder.findLocation(fusedLocationClient, this) { locationPair ->
+                        locationString = "${locationPair.first}, ${locationPair.second}"
+                    }
+
+                    LocationTest(
+                        name = locationString,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -43,9 +51,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun LocationTest(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "Current Location: $name",
         modifier = modifier
     )
 }
@@ -54,6 +62,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     WeaPredictTheme {
-        Greeting("Android")
+        LocationTest("Location Unknown")
     }
 }
