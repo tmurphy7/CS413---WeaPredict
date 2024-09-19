@@ -1,6 +1,5 @@
 package com.example.weapredict
 
-import android.location.Location
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.weapredict.ui.theme.WeaPredictTheme
@@ -25,13 +24,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Google Play service used to get location data
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        val locationString : String = LocationFinder.FindLocation(fusedLocationClient, this)
 
+        // Create the UI
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    // String will update automatically once location is returned
+                    var locationString by remember { mutableStateOf("Fetching location...") }
+
+                    // Returns the location of the user when available
+                    LocationFinder.findLocation(fusedLocationClient, this) { locationPair ->
+                        locationString = "${locationPair.first}, ${locationPair.second}"
+                    }
+
                     LocationTest(
                         name = locationString,
                         modifier = Modifier.padding(innerPadding)

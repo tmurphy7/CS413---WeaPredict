@@ -12,10 +12,15 @@ import com.google.android.gms.tasks.Task
 
 object LocationFinder {
 
-    var CURRENT_LOCATION_NAME: String = "Location Unknown"
-    var INITIALIZED: Boolean = false
+    // Values to use if location data is rejected
+    private var DEFAULT_LATITUDE: Double = 0.0
+    private var DEFAULT_LONGITUDE: Double = 0.0
 
-    fun FindLocation(fusedLocationClient: FusedLocationProviderClient, activity: Activity) : String {
+    // Detects if the user needs to approve the use of location data
+    private var INITIALIZED: Boolean = false
+
+    fun findLocation(fusedLocationClient: FusedLocationProviderClient, activity: Activity, callback: (Pair<Double, Double>) -> Unit) {
+        // Check to see if the user needs to approve location data permissions
         if (!INITIALIZED) {
             initializeLocationServices(fusedLocationClient, activity)
             INITIALIZED = true
@@ -30,25 +35,30 @@ object LocationFinder {
                 activity,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
-        ) { }
-
-        var longitude : Double = 0.0
-        var latitude : Double = 0.0
-                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                // Use the location here (latitude and longitude)
-                latitude = location.latitude
-                longitude = location.longitude
-                println("Location - Latitude: $latitude, Longitude: $longitude")
-            }
+        ) {
+            // If permission is denied, return default values
+            INITIALIZED = false
+            callback(Pair(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
         }
 
-        return ("$latitude, $longitude")
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            if (location != null)
+            {
+                callback(Pair(location.latitude, location.longitude))
+            }
+            else
+            {
+                INITIALIZED = false
+                callback(Pair(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
+            }
+        }
     }
 
+    // Numbers don't actually matter, just need to be unique
     private const val REQUEST_PERMISSION_COARSE_LOCATION = 1
     private const val REQUEST_PERMISSION_FINE_LOCATION = 2
 
+    // Requests location information permissions from user
     private fun initializeLocationServices(fusedLocationClient: FusedLocationProviderClient, activity: Activity) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
@@ -59,7 +69,6 @@ object LocationFinder {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_PERMISSION_FINE_LOCATION)
             ActivityCompat.requestPermissions(activity,
                 arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_PERMISSION_COARSE_LOCATION)
-            return
         }
     }
 }
