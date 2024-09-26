@@ -1,9 +1,12 @@
 package com.example.weapredict
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,42 +14,83 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.example.weapredict.LocationFinder
 
 class MainActivity : ComponentActivity() {
 
-    // Prepare to read location from user
+    // Handles the location API
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    // Handles requesting location services from the user
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                fetchLocation()
+            } else {
+                updateLocationString("Permission denied")
+            }
+        }
+
+    // String that updates the UI automatically when location data is returned
+    private var locationStringState by mutableStateOf("Checking permissions...")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Google Play service used to get location data
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Create the UI
+        // Creating the UI
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // String will update automatically once location is returned
-                    var locationString by remember { mutableStateOf("Fetching location...") }
-
-                    // Returns the location of the user when available
-                    LocationFinder.findLocation(fusedLocationClient, this) { locationPair ->
-                        locationString = "${locationPair.first}, ${locationPair.second}"
-                    }
-
                     LocationTest(
-                        name = locationString,
+                        name = locationStringState,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
         }
+
+        // After the UI is created, request location permissions
+        checkPermissionAndFetchLocation()
+    }
+
+    private fun checkPermissionAndFetchLocation() {
+        when {
+            ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                fetchLocation() // If permission was already granted, fetch the location
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                updateLocationString("Location permission is required to use WeaPredict.")
+            } // If permissions were denied, don't request location and display an error message
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            } // If neither of the previous conditions were true, request the location services
+        }
+    }
+
+    private fun fetchLocation() {
+        updateLocationString("Fetching location...")
+        LocationFinder.findLocation(fusedLocationClient, this) { result ->
+            result.fold( // Handles success and failure of findLocation function
+                onSuccess = { (latitude, longitude) ->
+                    updateLocationString("$latitude, $longitude")
+                },
+                onFailure = { error ->
+                    updateLocationString("Error: ${error.message}")
+                }
+            )
+        }
+    }
+
+    private fun updateLocationString(newLocation: String) {
+        locationStringState = newLocation
     }
 }
 
