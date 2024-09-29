@@ -80,7 +80,8 @@ class MainActivity : ComponentActivity() {
         LocationFinder.findLocation(fusedLocationClient, this) { result ->
             result.fold( // Handles success and failure of findLocation function
                 onSuccess = { (latitude, longitude) ->
-                    updateLocationString("$latitude, $longitude")
+                    val locationString = LocationFinder.getLocationAsAddress(this, latitude, longitude)
+                    updateLocationString("$latitude, $longitude, AKA $locationString")
                 },
                 onFailure = { error ->
                     updateLocationString("Error: ${error.message}")
