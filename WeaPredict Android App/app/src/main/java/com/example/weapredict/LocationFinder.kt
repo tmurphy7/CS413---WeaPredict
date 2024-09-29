@@ -3,10 +3,13 @@ package com.example.weapredict
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.tasks.Task
+import java.io.IOException
+import java.util.Locale
 
 object LocationFinder {
 
@@ -51,5 +54,30 @@ object LocationFinder {
         } catch (e: SecurityException) {
             callback(Result.failure(e))
         }
+    }
+
+    fun getLocationAsAddress(activity: Activity, latitude: Double, longitude: Double): String {
+        val geocoder = Geocoder(activity, Locale.getDefault())
+
+        try {
+            val addresses: List<Address> = geocoder.getFromLocation(latitude, longitude, 1) ?: emptyList()
+
+            if (addresses.isNotEmpty()) {
+                val address: Address = addresses[0]
+                val city = address.locality ?: ""
+                val state = address.adminArea ?: ""
+
+                return when {
+                    city.isNotEmpty() && state.isNotEmpty() -> "$city, $state"
+                    city.isNotEmpty() -> city
+                    state.isNotEmpty() -> state
+                    else -> "Unknown Location"
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return "Location Not Found"
     }
 }
