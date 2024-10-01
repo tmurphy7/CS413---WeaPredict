@@ -3,6 +3,7 @@ package com.example.weapredict
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -82,6 +83,9 @@ class MainActivity : ComponentActivity() {
                 onSuccess = { (latitude, longitude) ->
                     val locationString = LocationFinder.getLocationAsAddress(this, latitude, longitude)
                     updateLocationString("$latitude, $longitude, AKA $locationString")
+
+                    // TODO: Needs to place string, this is basically placeholder implementation
+                    WeatherFinder.requestLiveWeatherData(this, "$latitude", "$longitude")
                 },
                 onFailure = { error ->
                     updateLocationString("Error: ${error.message}")
