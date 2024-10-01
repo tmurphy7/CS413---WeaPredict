@@ -57,6 +57,10 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    DisplayDays()
+                }
+
             }
         }
 
@@ -99,23 +103,6 @@ class MainActivity : ComponentActivity() {
         locationStringState = newLocation
     }
 }
-
-@Composable
-fun LocationTest(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Current Location: $name",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WeaPredictTheme {
-        LocationTest("Location Unknown")
-        DisplayDays()
-    }
-}
 @Composable
 fun DisplayDays(){
     Row(modifier = Modifier
@@ -132,4 +119,20 @@ fun DisplayDays(){
 
 fun getDays(): List<String>{
     return listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+}
+
+@Composable
+fun LocationTest(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Current Location: $name",
+        modifier = modifier
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    WeaPredictTheme {
+        LocationTest("Location Unknown")
+    }
 }
