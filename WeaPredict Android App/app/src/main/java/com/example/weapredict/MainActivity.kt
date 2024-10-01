@@ -57,10 +57,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    DisplayDays()
-                }
-
+                DisplayDays()
             }
         }
 
