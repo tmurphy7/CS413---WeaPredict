@@ -19,6 +19,11 @@ import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
 
@@ -53,6 +58,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
+                DisplayDays()
             }
         }
 
@@ -97,6 +103,23 @@ class MainActivity : ComponentActivity() {
     private fun updateLocationString(newLocation: String) {
         locationStringState = newLocation
     }
+}
+@Composable
+fun DisplayDays(){
+    Row(modifier = Modifier
+        .horizontalScroll(rememberScrollState())
+        .fillMaxWidth()) {
+        for (days in getDays()){
+            Text(
+                text = days,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
+}
+
+fun getDays(): List<String>{
+    return listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 }
 
 @Composable
