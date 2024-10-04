@@ -111,14 +111,16 @@ fun DisplayDays(){
         .horizontalScroll(rememberScrollState())
         .fillMaxWidth()) {
         val calendar = Calendar.getInstance()
-        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
         var daysList = getDays()
 
         //Split the list to start from today
-        val daysListSecondHalf = daysList.subList(0,dayOfWeek - 2)
-        val daysListFirstHalf = daysList.subList(dayOfWeek -2,daysList.size)
-        daysList = daysListFirstHalf + daysListSecondHalf
-
+        if(dayOfWeek - 1 != 0){
+            val daysListSecondHalf = daysList.subList(0,dayOfWeek - 1)
+            val daysListFirstHalf = daysList.subList(dayOfWeek - 1,daysList.size)
+            daysList = daysListFirstHalf + daysListSecondHalf
+        }
+        
         for (day in daysList){
             Text(
                 text = day,
