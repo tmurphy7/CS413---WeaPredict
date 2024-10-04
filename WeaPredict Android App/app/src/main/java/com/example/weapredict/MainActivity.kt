@@ -24,6 +24,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.unit.dp
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
 
@@ -109,9 +110,18 @@ fun DisplayDays(){
     Row(modifier = Modifier
         .horizontalScroll(rememberScrollState())
         .fillMaxWidth()) {
-        for (days in getDays()){
+        val calendar = Calendar.getInstance()
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        var daysList = getDays()
+
+        //Split the list to start from today
+        val daysListSecondHalf = daysList.subList(0,dayOfWeek - 2)
+        val daysListFirstHalf = daysList.subList(dayOfWeek -2,daysList.size)
+        daysList = daysListFirstHalf + daysListSecondHalf
+
+        for (day in daysList){
             Text(
-                text = days,
+                text = day,
                 modifier = Modifier.padding(8.dp)
             )
         }
