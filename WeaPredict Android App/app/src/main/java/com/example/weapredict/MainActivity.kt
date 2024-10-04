@@ -111,10 +111,12 @@ fun DisplayDays(){
         var daysList = getDays()
 
         //Split the list to start from today
-        val daysListSecondHalf = daysList.subList(0,dayOfWeek - 1)
-        val daysListFirstHalf = daysList.subList(dayOfWeek - 1,daysList.size)
-        daysList = daysListFirstHalf + daysListSecondHalf
-
+        if(dayOfWeek - 1 != 0){
+            val daysListSecondHalf = daysList.subList(0,dayOfWeek - 1)
+            val daysListFirstHalf = daysList.subList(dayOfWeek - 1,daysList.size)
+            daysList = daysListFirstHalf + daysListSecondHalf
+        }
+        
         for (day in daysList){
             Text(
                 text = day,
