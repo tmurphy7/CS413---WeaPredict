@@ -3,7 +3,6 @@ package com.example.weapredict
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,8 +20,11 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.ui.unit.dp
 import java.util.Calendar
 
@@ -35,31 +37,49 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                fetchLocation()
+                fetchLocationAndLiveWeather()
             } else {
                 updateLocationString("Permission denied")
             }
         }
 
-    // String that updates the UI automatically when location data is returned
+    // Strings that update the UI automatically when location data and/or weather data is returned
     private var locationStringState by mutableStateOf("Checking permissions...")
+    private var weatherStringState by mutableStateOf("Awaiting weather data...")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Initialize necessary services
+        WeatherFinder.initialize(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Creating the UI
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LocationTest(
-                        name = locationStringState,
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(16.dp)
+                    ) {
+                        DisplayString(
+                            name = locationStringState,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        DisplayString(
+                            name = weatherStringState,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        DisplayDays()
+                    }
                 }
-                DisplayDays()
             }
         }
 
@@ -72,7 +92,7 @@ class MainActivity : ComponentActivity() {
             ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-                fetchLocation() // If permission was already granted, fetch the location
+                fetchLocationAndLiveWeather() // If permission was already granted, fetch data
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 updateLocationString("Location permission is required to use WeaPredict.")
@@ -83,16 +103,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun fetchLocation() {
+    private fun fetchLocationAndLiveWeather() {
         updateLocationString("Fetching location...")
         LocationFinder.findLocation(fusedLocationClient, this) { result ->
             result.fold( // Handles success and failure of findLocation function
                 onSuccess = { (latitude, longitude) ->
                     val locationString = LocationFinder.getLocationAsAddress(this, latitude, longitude)
-                    updateLocationString("$latitude, $longitude, AKA $locationString")
+                    updateLocationString(locationString)
 
-                    // TODO: Needs to place string, this is basically placeholder implementation
-                    WeatherFinder.requestLiveWeatherData(this, "$latitude", "$longitude")
+                    // Call requestLiveWeatherData with a callback
+                    WeatherFinder.requestLiveWeatherData("$latitude", "$longitude") { weatherData ->
+                        // Update weather data on the UI
+                        updateWeatherString(weatherData)
+                    }
                 },
                 onFailure = { error ->
                     updateLocationString("Error: ${error.message}")
@@ -103,6 +126,10 @@ class MainActivity : ComponentActivity() {
 
     private fun updateLocationString(newLocation: String) {
         locationStringState = newLocation
+    }
+
+    private fun updateWeatherString(newWeather: String) {
+        weatherStringState = newWeather
     }
 }
 @Composable
@@ -135,7 +162,7 @@ fun getDays(): List<String>{
 }
 
 @Composable
-fun LocationTest(name: String, modifier: Modifier = Modifier) {
+fun DisplayString(name: String, modifier: Modifier = Modifier) {
     Text(
         text = "Current Location: $name",
         modifier = modifier
@@ -146,6 +173,6 @@ fun LocationTest(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     WeaPredictTheme {
-        LocationTest("Location Unknown")
+        DisplayString("Location Unknown")
     }
 }
