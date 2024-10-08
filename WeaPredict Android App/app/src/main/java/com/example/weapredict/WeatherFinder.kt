@@ -30,7 +30,7 @@ object WeatherFinder {
         val baseUrl = "https://api.open-meteo.com/v1/forecast"
         val locationParams = "latitude=$latitude&longitude=$longitude"
         val currentParams = "current=temperature_2m,weather_code"
-        val additionalParams = "timezone=auto"
+        val additionalParams = "timezone=auto&temperature_unit=fahrenheit"
 
         val url = "$baseUrl?$locationParams&$currentParams&$additionalParams"
 
@@ -70,6 +70,6 @@ object WeatherFinder {
             else -> "Unknown"
         }
 
-        return "$weatherCondition, $temperature °C"
+        return "$weatherCondition, $temperature °F"
     }
 }
