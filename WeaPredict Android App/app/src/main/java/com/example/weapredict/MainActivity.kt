@@ -68,13 +68,13 @@ class MainActivity : ComponentActivity() {
                             .padding(16.dp)
                     ) {
                         DisplayString(
-                            name = locationStringState,
+                            string = locationStringState,
                             modifier = Modifier.fillMaxWidth()
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
                         DisplayString(
-                            name = weatherStringState,
+                            string = weatherStringState,
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -205,9 +205,9 @@ fun getHours(): List<String>{
 
 
 @Composable
-fun DisplayString(name: String, modifier: Modifier = Modifier) {
+fun DisplayString(string: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Current Location: $name",
+        text = string,
         modifier = modifier
     )
 }

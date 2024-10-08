@@ -70,6 +70,6 @@ object WeatherFinder {
             else -> "Unknown"
         }
 
-        return "Current weather: $weatherCondition, Temperature: $temperature°C"
+        return "$weatherCondition, $temperature °C"
     }
 }
