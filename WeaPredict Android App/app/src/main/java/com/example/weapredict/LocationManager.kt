@@ -11,7 +11,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import java.io.IOException
 import java.util.Locale
 
-object LocationFinder {
+object LocationManager {
 
     private const val DEFAULT_LATITUDE: Double = 0.0
     private const val DEFAULT_LONGITUDE: Double = 0.0

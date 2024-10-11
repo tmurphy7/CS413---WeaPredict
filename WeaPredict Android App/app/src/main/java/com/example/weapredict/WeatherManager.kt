@@ -1,6 +1,5 @@
 package com.example.weapredict
 
-import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.android.volley.Request
@@ -9,7 +8,14 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
-object WeatherFinder {
+object WeatherManager {
+
+    data class WeatherInstance(
+        var weather_type: String = "Unknown Weather",
+        var temperature: Double = 0.0,
+        var day: String = "Unknownsday", // Unsure if day and time will be needed
+        var time: String = "99:99"
+    )
 
     private lateinit var requestQueue: RequestQueue
 
@@ -21,7 +27,7 @@ object WeatherFinder {
         }
     }
 
-    fun requestLiveWeatherData(latitude: String, longitude: String, callback: (String) -> Unit) {
+    fun requestLiveWeatherData(latitude: String, longitude: String, callback: (WeatherInstance) -> Unit) {
         if (!::requestQueue.isInitialized) {
             throw IllegalStateException("RequestQueue not initialized. Call WeatherFinder.initialize(context) first.")
         }
@@ -42,7 +48,7 @@ object WeatherFinder {
             },
             { error ->
                 Log.d("Debug", "Error: ${error.toString()}")
-                callback("Weather data not available. Error: ${error.message}")
+                callback(WeatherInstance())
             }
         )
 
@@ -50,7 +56,7 @@ object WeatherFinder {
     }
 
     // Converts JSON response into a temperature and weather type using a weather code
-    private fun parseWeatherResponse(response: JSONObject): String {
+    private fun parseWeatherResponse(response: JSONObject): WeatherInstance {
         val current = response.getJSONObject("current")
         val temperature = current.getDouble("temperature_2m")
         val weatherCode = current.getInt("weather_code")
@@ -70,6 +76,6 @@ object WeatherFinder {
             else -> "Unknown"
         }
 
-        return "$weatherCondition, $temperature °F"
+        return WeatherInstance(weatherCondition, temperature)
     }
 }

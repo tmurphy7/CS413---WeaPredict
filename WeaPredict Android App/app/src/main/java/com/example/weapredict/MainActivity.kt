@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Initialize necessary services
-        WeatherFinder.initialize(this)
+        WeatherManager.initialize(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Creating the UI
@@ -110,16 +110,18 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchLocationAndLiveWeather() {
         updateLocationString("Fetching location...")
-        LocationFinder.findLocation(fusedLocationClient, this) { result ->
+        LocationManager.findLocation(fusedLocationClient, this) { result ->
             result.fold( // Handles success and failure of findLocation function
                 onSuccess = { (latitude, longitude) ->
-                    val locationString = LocationFinder.getLocationAsAddress(this, latitude, longitude)
+                    val locationString = LocationManager.getLocationAsAddress(this, latitude, longitude)
                     updateLocationString(locationString)
 
                     // Call requestLiveWeatherData with a callback
-                    WeatherFinder.requestLiveWeatherData("$latitude", "$longitude") { weatherData ->
+                    WeatherManager.requestLiveWeatherData("$latitude", "$longitude") { weatherData ->
                         // Update weather data on the UI
-                        updateWeatherString(weatherData)
+                        val currentWeather = weatherData.weather_type
+                        val currentTemperature = weatherData.temperature
+                        updateWeatherString("$currentWeather, $currentTemperature °F")
                     }
                 },
                 onFailure = { error ->
