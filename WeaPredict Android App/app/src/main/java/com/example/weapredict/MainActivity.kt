@@ -1,32 +1,39 @@
 package com.example.weapredict
 
 import android.Manifest
+import android.R.attr.contentDescription
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.unit.dp
 import java.util.Calendar
+
 
 class MainActivity : ComponentActivity() {
 
@@ -159,11 +166,21 @@ fun DisplayDays(){
             daysList = daysListFirstHalf + daysListSecondHalf
         }
         
-        for (day in daysList){
-            Text(
-                text = day + "\n" + temperature + "\n" + skies,
-                modifier = Modifier.padding(8.dp)
-            )
+        for (day in daysList) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Box(modifier = Modifier.height(50.dp)) {
+                    Image(
+                        modifier = Modifier.size(60.dp),
+                        contentDescription = "Weather Image",
+                        contentScale = ContentScale.Crop,
+                        painter = painterResource(R.drawable.snow)
+                    )
+                }
+                Text(
+                    text = day + "\n" + temperature + "\n" + skies,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
     }
 }
@@ -190,11 +207,21 @@ fun DisplayHours() {
             hoursList = hoursListFirstHalf + hoursListSecondHalf
         }
 
-        for (hour in hoursList){
-            Text(
-                text = hour + "\n" + temperature + "\n" +  skies,
-                modifier = Modifier.padding(8.dp)
-            )
+        for (hour in hoursList) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Box(modifier = Modifier.height(50.dp)) {
+                    Image(
+                        modifier = Modifier.size(60.dp),
+                        contentDescription = "Weather Image",
+                        contentScale = ContentScale.Crop,
+                        painter = painterResource(R.drawable.sun)
+                    )
+                }
+                Text(
+                    text = hour + "\n" + temperature + "\n" + skies,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
     }
 
