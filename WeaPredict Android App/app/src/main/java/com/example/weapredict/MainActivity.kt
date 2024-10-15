@@ -25,10 +25,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
 import androidx.compose.ui.unit.dp
 import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
+
+    private var locationServicesEnabled = true
 
     // Handles the location API
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -39,7 +42,9 @@ class MainActivity : ComponentActivity() {
             if (isGranted) {
                 fetchLocationAndLiveWeather()
             } else {
-                updateLocationString("Permission denied")
+                updateLocationString("Location permissions are required to use WeaPredict." +
+                " To use WeaPredict, please enable location services in your phone's settings.")
+                updateWeatherString("Current weather unavailable.")
             }
         }
 
@@ -67,6 +72,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .padding(16.dp)
                     ) {
+                        FindLocationButton(onClick = { checkPermissionAndFetchLocation() })
                         DisplayString(
                             string = locationStringState,
                             modifier = Modifier.fillMaxWidth()
@@ -78,11 +84,15 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                        DisplayDays()
+                        // NOTE: Check doesn't actually do anything yet
+                        if (locationServicesEnabled)
+                        {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            DisplayDays()
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                        DisplayHours()
+                            Spacer(modifier = Modifier.height(16.dp))
+                            DisplayHours()
+                        }
                     }
                 }
             }
@@ -212,6 +222,13 @@ fun DisplayString(string: String, modifier: Modifier = Modifier) {
         text = string,
         modifier = modifier
     )
+}
+
+@Composable
+fun FindLocationButton(onClick: () -> Unit) {
+    Button(onClick = { onClick() }) {
+        Text("Refresh Data")
+    }
 }
 
 @Preview(showBackground = true)
