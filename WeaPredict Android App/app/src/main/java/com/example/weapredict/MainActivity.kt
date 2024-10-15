@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -165,18 +166,21 @@ fun DisplayDays(){
             daysList = daysListFirstHalf + daysListSecondHalf
         }
         
-        for (day in daysList){
-            Box(modifier=Modifier.height(50.dp)){
-                Image(
-                    contentDescription = "Weather Image",
-                    contentScale = ContentScale.Crop,
-                    painter = painterResource(R.drawable.sun)
+        for (day in daysList) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Box(modifier = Modifier.height(50.dp)) {
+                    Image(
+                        modifier = Modifier.size(60.dp),
+                        contentDescription = "Weather Image",
+                        contentScale = ContentScale.Crop,
+                        painter = painterResource(R.drawable.snow)
+                    )
+                }
+                Text(
+                    text = day + "\n" + temperature + "\n" + skies,
+                    modifier = Modifier.padding(8.dp)
                 )
             }
-            Text(
-                text = day + "\n" + temperature + "\n" + skies,
-                modifier = Modifier.padding(8.dp)
-            )
         }
     }
 }
@@ -203,18 +207,21 @@ fun DisplayHours() {
             hoursList = hoursListFirstHalf + hoursListSecondHalf
         }
 
-        for (hour in hoursList){
-            Box(modifier=Modifier.height(50.dp)){
-                Image(
-                    contentDescription = "Weather Image",
-                    contentScale = ContentScale.Crop,
-                    painter = painterResource(R.drawable.sun)
+        for (hour in hoursList) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Box(modifier = Modifier.height(50.dp)) {
+                    Image(
+                        modifier = Modifier.size(60.dp),
+                        contentDescription = "Weather Image",
+                        contentScale = ContentScale.Crop,
+                        painter = painterResource(R.drawable.sun)
+                    )
+                }
+                Text(
+                    text = hour + "\n" + temperature + "\n" + skies,
+                    modifier = Modifier.padding(8.dp)
                 )
             }
-            Text(
-                text = hour + "\n" + temperature + "\n" +  skies,
-                modifier = Modifier.padding(8.dp)
-            )
         }
     }
 
