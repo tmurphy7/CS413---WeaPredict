@@ -46,6 +46,8 @@ import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
 
+    private var currentWeatherData = WeatherManager.WeatherInstance()
+
     private var locationServicesEnabled = true
 
     // Handles the location API
@@ -144,8 +146,9 @@ class MainActivity : ComponentActivity() {
                     // Call requestLiveWeatherData with a callback
                     WeatherManager.requestLiveWeatherData("$latitude", "$longitude") { weatherData ->
                         // Update weather data on the UI
-                        val currentWeather = weatherData.weather_type
-                        val currentTemperature = weatherData.temperature
+                        currentWeatherData = weatherData
+                        val currentWeather = currentWeatherData.weather_type
+                        val currentTemperature = currentWeatherData.temperature
                         updateWeatherString("$currentWeather, $currentTemperature °F")
                     }
                 },
