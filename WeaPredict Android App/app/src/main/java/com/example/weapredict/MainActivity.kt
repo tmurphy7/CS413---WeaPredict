@@ -156,13 +156,25 @@ fun DisplayDays(){
         val weatherObjectDaysList = getDays()
         
         for (day in weatherObjectDaysList) {
+            //set image for weather type
+            val weatherCondition = when (day.weather_type) {
+                "Clear Skies" -> R.drawable.sun
+                "Partly Cloudy" -> R.drawable.parlycloudy
+                "Fog" -> R.drawable.fog
+                "Light Rain" -> R.drawable.lightrain
+                "Rain" -> R.drawable.heavyrain
+                "Snow"-> R.drawable.snow
+                "Storm" -> R.drawable.storm
+                "Storm with Hail" -> R.drawable.stormwithheavyrain
+                else -> R.drawable.sun
+            }
             Column(modifier = Modifier.padding(8.dp)) {
                 Box(modifier = Modifier.height(50.dp)) {
                     Image(
                         modifier = Modifier.size(60.dp),
                         contentDescription = "Weather Image",
                         contentScale = ContentScale.Crop,
-                        painter = painterResource(R.drawable.snow)
+                        painter = painterResource(weatherCondition)
                     )
                 }
                 Text(
@@ -181,14 +193,27 @@ fun DisplayHours() {
         .fillMaxWidth()) {
 
         val weatherObjectHourList = getHours()
+        //set image for weather type
         for (hour in weatherObjectHourList) {
+            val weatherCondition = when (hour.weather_type) {
+                "Clear Skies" -> R.drawable.sun
+                "Partly Cloudy" -> R.drawable.parlycloudy
+                "Fog" -> R.drawable.fog
+                "Light Rain" -> R.drawable.lightrain
+                "Rain" -> R.drawable.heavyrain
+                "Snow"-> R.drawable.snow
+                "Storm" -> R.drawable.storm
+                "Storm with Hail" -> R.drawable.stormwithheavyrain
+                else -> R.drawable.sun
+            }
+
             Column(modifier = Modifier.padding(8.dp)) {
                 Box(modifier = Modifier.height(50.dp)) {
                     Image(
                         modifier = Modifier.size(60.dp),
                         contentDescription = "Weather Image",
                         contentScale = ContentScale.Crop,
-                        painter = painterResource(R.drawable.sun)
+                        painter = painterResource(weatherCondition)
                     )
                 }
                 Text(
