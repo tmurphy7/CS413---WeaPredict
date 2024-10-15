@@ -181,12 +181,12 @@ fun DisplayDays(){
             val weatherCondition = when (day.weather_type) {
                 "Clear Skies" -> R.drawable.sun
                 "Partly Cloudy" -> R.drawable.parlycloudy
-                "Fog" -> R.drawable.fog
-                "Light Rain" -> R.drawable.lightrain
-                "Rain" -> R.drawable.heavyrain
-                "Snow"-> R.drawable.snow
-                "Storm" -> R.drawable.storm
-                "Storm with Hail" -> R.drawable.stormwithheavyrain
+                "Foggy" -> R.drawable.fog
+                "Drizzle" -> R.drawable.lightrain
+                "Rain showers","Rain" -> R.drawable.heavyrain
+                "Snow","Snow showers","Snow grains" -> R.drawable.snow
+                "Thunderstorm" -> R.drawable.storm
+                "Thunderstorm with hail" -> R.drawable.stormwithheavyrain
                 else -> R.drawable.sun
             }
             Column(modifier = Modifier.padding(8.dp)) {
@@ -219,12 +219,12 @@ fun DisplayHours() {
             val weatherCondition = when (hour.weather_type) {
                 "Clear Skies" -> R.drawable.sun
                 "Partly Cloudy" -> R.drawable.parlycloudy
-                "Fog" -> R.drawable.fog
-                "Light Rain" -> R.drawable.lightrain
-                "Rain" -> R.drawable.heavyrain
-                "Snow"-> R.drawable.snow
-                "Storm" -> R.drawable.storm
-                "Storm with Hail" -> R.drawable.stormwithheavyrain
+                "Foggy" -> R.drawable.fog
+                "Drizzle" -> R.drawable.lightrain
+                "Rain showers","Rain" -> R.drawable.heavyrain
+                "Snow","Snow showers","Snow grains" -> R.drawable.snow
+                "Thunderstorm" -> R.drawable.storm
+                "Thunderstorm with hail" -> R.drawable.stormwithheavyrain
                 else -> R.drawable.sun
             }
 
@@ -251,7 +251,7 @@ fun getDays(): List<WeatherManager.WeatherInstance>{
     val calendar = Calendar.getInstance()
     val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
-    var daysList = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    var daysList = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     //Split the list to start from today
     if(dayOfWeek != 0){
         val daysListSecondHalf = daysList.subList(0,dayOfWeek - 1)
@@ -264,7 +264,7 @@ fun getDays(): List<WeatherManager.WeatherInstance>{
 
     //add first day to list
     val temperature = 68.0 // Get temp and conditions from api
-    val skies = "Clear Skies"
+    val skies = "Clear \nSkies"
     val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature = temperature, day = daysList[0])
 
     //drop first element from dayslist
@@ -292,7 +292,7 @@ fun getHours(): List<WeatherManager.WeatherInstance>{
 
     //get current weather
     val temperature = 68.0
-    val skies = "Partly Cloudy"
+    val skies = "Partly \nCloudy"
 
     //sort list of hours into correct order
     if(currentHour != 0){
