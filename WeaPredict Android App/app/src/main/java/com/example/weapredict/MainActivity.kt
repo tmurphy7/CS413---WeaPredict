@@ -179,8 +179,8 @@ fun DisplayDays(){
         for (day in weatherObjectDaysList) {
             //set image for weather type
             val weatherCondition = when (day.weather_type) {
-                "Clear Skies" -> R.drawable.sun
-                "Partly Cloudy" -> R.drawable.parlycloudy
+                "Clear \nsky" -> R.drawable.sun
+                "Partly \ncloudy" -> R.drawable.parlycloudy
                 "Foggy" -> R.drawable.fog
                 "Drizzle" -> R.drawable.lightrain
                 "Rain showers","Rain" -> R.drawable.heavyrain
@@ -217,8 +217,8 @@ fun DisplayHours() {
         //set image for weather type
         for (hour in weatherObjectHourList) {
             val weatherCondition = when (hour.weather_type) {
-                "Clear Skies" -> R.drawable.sun
-                "Partly Cloudy" -> R.drawable.parlycloudy
+                "Clear \nsky" -> R.drawable.sun
+                "Partly \ncloudy" -> R.drawable.parlycloudy
                 "Foggy" -> R.drawable.fog
                 "Drizzle" -> R.drawable.lightrain
                 "Rain showers","Rain" -> R.drawable.heavyrain
@@ -260,18 +260,17 @@ fun getDays(): List<WeatherManager.WeatherInstance>{
     }
 
     var weatherObjectList: List<WeatherManager.WeatherInstance> = emptyList()
-    //for loop through days creating weather objects and adding to list
 
     //add first day to list
     val temperature = 68.0 // Get temp and conditions from api
-    val skies = "Clear \nSkies"
+    val skies = "Clear \nsky"
     val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature = temperature, day = daysList[0])
 
     //drop first element from dayslist
     daysList = daysList.drop(1)
 
     weatherObjectList = weatherObjectList + todaysWeather
-
+//for loop through days creating weather objects and adding to list
     for(x in daysList){
         val nextDayTemp = 70.0 // predict temperature
         val nextDaySkies = "Rain" // predict conditions
@@ -292,7 +291,7 @@ fun getHours(): List<WeatherManager.WeatherInstance>{
 
     //get current weather
     val temperature = 68.0
-    val skies = "Partly \nCloudy"
+    val skies = "Partly \ncloudy"
 
     //sort list of hours into correct order
     if(currentHour != 0){
