@@ -148,25 +148,14 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun DisplayDays(){
+    //Display the weather for 7 day forecast
     Row(modifier = Modifier
         .horizontalScroll(rememberScrollState())
         .fillMaxWidth()) {
 
-        val calendar = Calendar.getInstance()
-        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
-        var daysList = getDays()
-
-        val temperature = "68\u2109"
-        val skies = "Clear Skies"
-
-        //Split the list to start from today
-        if(dayOfWeek != 0){
-            val daysListSecondHalf = daysList.subList(0,dayOfWeek - 1)
-            val daysListFirstHalf = daysList.subList(dayOfWeek - 1,daysList.size)
-            daysList = daysListFirstHalf + daysListSecondHalf
-        }
+        val weatherObjectDaysList = getDays()
         
-        for (day in daysList) {
+        for (day in weatherObjectDaysList) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Box(modifier = Modifier.height(50.dp)) {
                     Image(
@@ -177,7 +166,7 @@ fun DisplayDays(){
                     )
                 }
                 Text(
-                    text = day + "\n" + temperature + "\n" + skies,
+                    text = day.day + "\n" + day.temperature + "\n" + day.weather_type,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -185,29 +174,14 @@ fun DisplayDays(){
     }
 }
 
-fun getDays(): List<String>{
-    return listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-}
 @Composable
 fun DisplayHours() {
     Row(modifier = Modifier
         .horizontalScroll(rememberScrollState())
         .fillMaxWidth()) {
 
-        val currentTime = Calendar.getInstance()
-        val currentHour = currentTime.get(Calendar.HOUR_OF_DAY)
-        var hoursList = getHours()
-
-        val temperature = "68\u2109"
-        val skies = "Partly Cloudy"
-
-        if(currentHour != 0){
-            val hoursListSecondHalf = hoursList.subList(0,currentHour)
-            val hoursListFirstHalf = hoursList.subList(currentHour,hoursList.size)
-            hoursList = hoursListFirstHalf + hoursListSecondHalf
-        }
-
-        for (hour in hoursList) {
+        val weatherObjectHourList = getHours()
+        for (hour in weatherObjectHourList) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Box(modifier = Modifier.height(50.dp)) {
                     Image(
@@ -218,7 +192,7 @@ fun DisplayHours() {
                     )
                 }
                 Text(
-                    text = hour + "\n" + temperature + "\n" + skies,
+                    text = hour.hour + "\n" + hour.temperature + "\n" + hour.weather_type,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -226,10 +200,79 @@ fun DisplayHours() {
     }
 
 }
+fun getDays(): List<WeatherManager.WeatherInstance>{
+    //create 7 weather objects and make predictions to fill weather
+    val calendar = Calendar.getInstance()
+    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
-fun getHours(): List<String>{
-    return listOf("12AM","1AM","2AM","3AM","4AM","5AM","6AM","7AM","8AM","9AM","10AM","11AM","12PM","1PM",
+    var daysList = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    //Split the list to start from today
+    if(dayOfWeek != 0){
+        val daysListSecondHalf = daysList.subList(0,dayOfWeek - 1)
+        val daysListFirstHalf = daysList.subList(dayOfWeek - 1,daysList.size)
+        daysList = daysListFirstHalf + daysListSecondHalf
+    }
+
+    var weatherObjectList: List<WeatherManager.WeatherInstance> = emptyList()
+    //for loop through days creating weather objects and adding to list
+
+    //add first day to list
+    val temperature = 68.0 // Get temp and conditions from api
+    val skies = "Clear Skies"
+    val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature = temperature, day = daysList[0])
+
+    //drop first element from dayslist
+    daysList = daysList.drop(1)
+
+    weatherObjectList = weatherObjectList + todaysWeather
+
+    for(x in daysList){
+        val nextDayTemp = 70.0 // predict temperature
+        val nextDaySkies = "Rain" // predict conditions
+        val nextDayWeather = WeatherManager.WeatherInstance(weather_type = nextDaySkies,temperature = nextDayTemp, day = x)
+        weatherObjectList = weatherObjectList + nextDayWeather
+    }
+
+    return weatherObjectList
+}
+
+fun getHours(): List<WeatherManager.WeatherInstance>{
+    var hoursList = listOf("12AM","1AM","2AM","3AM","4AM","5AM","6AM","7AM","8AM","9AM","10AM","11AM","12PM","1PM",
         "2PM","3PM","4PM","5PM","6PM","7PM","8PM","9PM","10PM","11PM")
+
+    //get current hour
+    val currentTime = Calendar.getInstance()
+    val currentHour = currentTime.get(Calendar.HOUR_OF_DAY)
+
+    //get current weather
+    val temperature = 68.0
+    val skies = "Partly Cloudy"
+
+    //sort list of hours into correct order
+    if(currentHour != 0){
+        val hoursListSecondHalf = hoursList.subList(0,currentHour)
+        val hoursListFirstHalf = hoursList.subList(currentHour,hoursList.size)
+        hoursList = hoursListFirstHalf + hoursListSecondHalf
+    }
+
+    var weatherObjectList: List<WeatherManager.WeatherInstance> = emptyList()
+    //for loop through days creating weather objects and adding to list
+    val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature = temperature, hour = hoursList[0])
+
+    //drop first element from hourslist
+    hoursList = hoursList.drop(1)
+
+
+    weatherObjectList = weatherObjectList + todaysWeather
+
+    for(x in hoursList){
+        val nextDayTemp = 70.0 // predict temperature
+        val nextDaySkies = "Rain" // predict conditions
+        val nextDayWeather = WeatherManager.WeatherInstance(weather_type = nextDaySkies,temperature = nextDayTemp, hour = x)
+        weatherObjectList = weatherObjectList + nextDayWeather
+    }
+
+    return weatherObjectList
 }
 
 
