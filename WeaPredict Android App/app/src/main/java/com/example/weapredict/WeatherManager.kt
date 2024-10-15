@@ -14,7 +14,8 @@ object WeatherManager {
         var weather_type: String = "Unknown Weather",
         var temperature: Double = 0.0,
         var day: String = "Unknownsday", // Unsure if day and time will be needed
-        var time: String = "99:99"
+        var time: String = "99:99",
+        var hour: String = "1AM"
     )
 
     private lateinit var requestQueue: RequestQueue
