@@ -127,7 +127,9 @@ class MainActivity : ComponentActivity() {
                 fetchLocationAndLiveWeather() // If permission was already granted, fetch data
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                updateLocationString("Location permission is required to use WeaPredict.")
+                updateLocationString("Location permission is required to use WeaPredict." +
+                        " To use WeaPredict, please enable location services in your phone's settings.")
+                updateWeatherString("Current weather unavailable.")
             } // If permissions were denied, don't request location and display an error message
             else -> {
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
