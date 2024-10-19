@@ -63,8 +63,8 @@ object WeatherManager {
         val weatherCode = current.getInt("weather_code")
 
         val weatherCondition = when (weatherCode) {
-            0 -> "Clear \nsky"
-            1, 2, 3 -> "Partly \ncloudy"
+            0 -> "Clear sky"
+            1, 2, 3 -> "Partly cloudy"
             45, 48 -> "Foggy"
             51, 53, 55 -> "Drizzle"
             61, 63, 65 -> "Rain"
