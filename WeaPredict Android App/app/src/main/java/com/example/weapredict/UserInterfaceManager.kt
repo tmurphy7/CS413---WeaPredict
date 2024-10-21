@@ -46,6 +46,10 @@ object UserInterfaceManager {
                     else -> R.drawable.sun
                 }
                 Column(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = day.day,
+                        modifier = Modifier.padding(8.dp)
+                    )
                     Box(modifier = Modifier.height(50.dp)) {
                         Image(
                             modifier = Modifier.size(60.dp),
@@ -55,7 +59,7 @@ object UserInterfaceManager {
                         )
                     }
                     Text(
-                        text = day.day + "\n" + day.temperature,
+                        text = day.temperature.toString() + "\u00B0",
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -85,6 +89,10 @@ object UserInterfaceManager {
                 }
 
                 Column(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = hour.hour,
+                        modifier = Modifier.padding(8.dp)
+                    )
                     Box(modifier = Modifier.height(50.dp)) {
                         Image(
                             modifier = Modifier.size(60.dp),
@@ -94,7 +102,7 @@ object UserInterfaceManager {
                         )
                     }
                     Text(
-                        text = hour.hour + "\n" + hour.temperature,
+                        text = hour.temperature.toString() + "\u00B0",
                         modifier = Modifier.padding(8.dp)
                     )
                 }
