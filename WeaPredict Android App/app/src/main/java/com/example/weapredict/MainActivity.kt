@@ -3,6 +3,7 @@ package com.example.weapredict
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +27,8 @@ import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import org.tensorflow.lite.Interpreter
+import java.util.Date
 
 class MainActivity : ComponentActivity() {
 
@@ -34,6 +37,11 @@ class MainActivity : ComponentActivity() {
 
     private var locationServicesEnabled = true
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private var temperatureModelName = "temperatureModel.tflite"
+    private lateinit var temperatureModel: Interpreter
+    private var weatherModelName = "weatherModel.tflite"
+    private lateinit var weatherModel: Interpreter
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -48,6 +56,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WeatherManager.initialize(this)
+
+        val currentDateTime = Date()
+        Log.d("DEBUG", currentDateTime.toString())
+
+        // TODO: Temperature model testing for R
+        // temperatureModel = ModelManager.loadModelFromAssetsFolder(temperatureModelName, this)
+        // val temperatureModelTestInput = currentDateTime
+        // val temperatureModelTestOutput = FloatArray(1)
+        // temperatureModel.run(temperatureModelTestInput, temperatureModelTestOutput)
+        // Log.d("DEBUG", temperatureModelTestOutput.toString())
+
+        // TODO: Weather code model testing for T
+        // weatherModel = ModelManager.loadModelFromAssetsFolder(weatherModelName, this)
+        // val weatherModelTestInput = currentDateTime
+        // val weatherModelTestOutput = FloatArray(1)
+        // weatherModel.run(weatherModelTestInput, weatherModelTestOutput)
+        // Log.d("DEBUG", weatherModelTestOutput.toString())
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createUI()
         checkPermissionAndFetchLocation()
