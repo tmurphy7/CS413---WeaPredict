@@ -11,11 +11,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
@@ -24,39 +29,27 @@ import com.google.android.gms.location.LocationServices
 
 class MainActivity : ComponentActivity() {
 
-    private var currentWeatherData = WeatherManager.WeatherInstance()
+    private var currentWeatherData by mutableStateOf(WeatherManager.WeatherInstance())
+    private var locationStringState by mutableStateOf("Checking permissions...")
 
     private var locationServicesEnabled = true
-
-    // Handles the location API
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    // Handles requesting location services from the user
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
                 fetchLocationAndLiveWeather()
             } else {
                 updateLocationString("Location permissions are required to use WeaPredict." +
-                " To use WeaPredict, please enable location services in your phone's settings.")
-                updateWeatherString("Current weather unavailable.")
+                        " To use WeaPredict, please enable location services in your phone's settings.")
             }
         }
 
-    // Strings that update the UI automatically when location data and/or weather data is returned
-    private var locationStringState by mutableStateOf("Checking permissions...")
-    private var weatherStringState by mutableStateOf("Awaiting weather data...")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Initialize necessary services
         WeatherManager.initialize(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         createUI()
-
-        // After the UI is created, request location permissions
         checkPermissionAndFetchLocation()
     }
 
@@ -65,34 +58,106 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeaPredictTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = MaterialTheme.colorScheme.background
                 ) { innerPadding ->
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        UserInterfaceManager.FindLocationButton(onClick = { checkPermissionAndFetchLocation() })
-                        UserInterfaceManager.DisplayString(
-                            string = locationStringState,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        UserInterfaceManager.DisplayString(
-                            string = weatherStringState,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        // NOTE: Check doesn't actually do anything yet
-                        if (locationServicesEnabled) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            UserInterfaceManager.DisplayDays(currentWeatherData)
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            UserInterfaceManager.DisplayHours(currentWeatherData)
+                        // Current Weather
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 4.dp
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(24.dp)
+                            ) {
+                                Text(
+                                    text = "Current Weather",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                                Text(
+                                    text = "${currentWeatherData.weather_type}, ${currentWeatherData.temperature} °F",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
+
+                        if (locationServicesEnabled) {
+                            // Daily Forecast Section
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = "Daily Forecast",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    UserInterfaceManager.DisplayDays(currentWeatherData)
+                                }
+                            }
+
+                            // Hourly Forecast Section
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = "Hourly Forecast",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    UserInterfaceManager.DisplayHours(currentWeatherData)
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // Location Display
+                        Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = locationStringState,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                        }
+
+                        // Refresh Button
+                        UserInterfaceManager.FindLocationButton(
+                            onClick = { checkPermissionAndFetchLocation() }
+                        )
                     }
                 }
             }
@@ -101,37 +166,35 @@ class MainActivity : ComponentActivity() {
 
     private fun checkPermissionAndFetchLocation() {
         when {
-            ContextCompat.checkSelfPermission(this,
+            ContextCompat.checkSelfPermission(
+                this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
                 fetchLocationAndLiveWeather() // If permission was already granted, fetch data
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                updateLocationString("Location permission is required to use WeaPredict." +
-                        " To use WeaPredict, please enable location services in your phone's settings.")
-                updateWeatherString("Current weather unavailable.")
-            } // If permissions were denied, don't request location and display an error message
+                updateLocationString(
+                    "Location permission is required to use WeaPredict." +
+                            " To use WeaPredict, please enable location services in your phone's settings."
+                )
+            }
             else -> {
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            } // If neither of the previous conditions were true, request the location services
+            }
         }
     }
 
     private fun fetchLocationAndLiveWeather() {
         updateLocationString("Fetching location...")
         LocationManager.findLocation(fusedLocationClient, this) { result ->
-            result.fold( // Handles success and failure of findLocation function
+            result.fold(
                 onSuccess = { (latitude, longitude) ->
                     val locationString = LocationManager.getLocationAsAddress(this, latitude, longitude)
                     updateLocationString(locationString)
 
-                    // Call requestLiveWeatherData with a callback
                     WeatherManager.requestLiveWeatherData("$latitude", "$longitude") { weatherData ->
-                        // Update weather data on the UI
+                        // Update the state variable directly
                         currentWeatherData = weatherData
-                        val currentWeather = currentWeatherData.weather_type
-                        val currentTemperature = currentWeatherData.temperature
-                        updateWeatherString("$currentWeather, $currentTemperature °F")
                     }
                 },
                 onFailure = { error ->
@@ -142,10 +205,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun updateLocationString(newLocation: String) {
-        locationStringState = newLocation
-    }
-
-    private fun updateWeatherString(newWeather: String) {
-        weatherStringState = newWeather
+        locationStringState = "Location: $newLocation"
     }
 }

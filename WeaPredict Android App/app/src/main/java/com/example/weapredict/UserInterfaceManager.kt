@@ -16,9 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.example.weapredict.ui.theme.WeaPredictTheme
 import java.util.Calendar
 
 object UserInterfaceManager {
@@ -110,7 +109,7 @@ object UserInterfaceManager {
         }
 
     }
-    fun getDays(currentWeatherData : WeatherManager.WeatherInstance): List<WeatherManager.WeatherInstance>{
+    private fun getDays(currentWeatherData : WeatherManager.WeatherInstance): List<WeatherManager.WeatherInstance>{
         //create 7 weather objects and make predictions to fill weather
         val calendar = Calendar.getInstance()
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
@@ -145,7 +144,7 @@ object UserInterfaceManager {
         return weatherObjectList
     }
 
-    fun getHours(currentWeatherData : WeatherManager.WeatherInstance): List<WeatherManager.WeatherInstance>{
+    private fun getHours(currentWeatherData : WeatherManager.WeatherInstance): List<WeatherManager.WeatherInstance>{
         var hoursList = listOf("12AM","1AM","2AM","3AM","4AM","5AM","6AM","7AM","8AM","9AM","10AM","11AM","12PM","1PM",
             "2PM","3PM","4PM","5PM","6PM","7PM","8PM","9PM","10PM","11PM")
 
@@ -158,9 +157,9 @@ object UserInterfaceManager {
         val skies = currentWeatherData.weather_type
 
         //sort list of hours into correct order
-        if(currentHour != 0){
-            val hoursListSecondHalf = hoursList.subList(0,currentHour)
-            val hoursListFirstHalf = hoursList.subList(currentHour,hoursList.size)
+        if(currentHour != 0) {
+            val hoursListSecondHalf = hoursList.subList(0, currentHour)
+            val hoursListFirstHalf = hoursList.subList(currentHour, hoursList.size)
             hoursList = hoursListFirstHalf + hoursListSecondHalf
         }
 
@@ -170,7 +169,6 @@ object UserInterfaceManager {
 
         //drop first element from hourslist
         hoursList = hoursList.drop(1)
-
 
         weatherObjectList = weatherObjectList + todaysWeather
 
@@ -182,15 +180,6 @@ object UserInterfaceManager {
         }
 
         return weatherObjectList
-    }
-
-
-    @Composable
-    fun DisplayString(string: String, modifier: Modifier = Modifier) {
-        Text(
-            text = string,
-            modifier = modifier
-        )
     }
 
     @Composable
