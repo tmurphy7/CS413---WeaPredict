@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
                                 Text(
-                                    text = "${currentWeatherData.weather_type}, ${currentWeatherData.temperature} °F",
+                                    text = "${currentWeatherData.weather_type}, ${currentWeatherData.temperature_high} °F",
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.fillMaxWidth()
                                 )
