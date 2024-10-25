@@ -12,6 +12,7 @@ playServicesLocation = "21.3.0"
 tensorflowLite = "2.15.0"
 tensorflowLiteSupport = "0.4.4"
 volley = "1.2.1"
+litert = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +33,7 @@ play-services-location = { module = "com.google.android.gms:play-services-locati
 tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
 tensorflow-lite-support = { module = "org.tensorflow:tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+litert = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
