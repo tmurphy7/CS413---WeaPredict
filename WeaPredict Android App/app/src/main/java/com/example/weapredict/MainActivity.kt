@@ -18,10 +18,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
@@ -69,10 +70,10 @@ class MainActivity : ComponentActivity() {
 
         // TODO: Weather code model testing for T
         weatherModel = ModelManager.loadModelFromAssetsFolder(weatherModelName, this)
-        val weatherModelTestInput = 54.5 // Example float input for temperature
-        val weatherModelTestOutput = FloatArray(1)
+        val weatherModelTestInput = 54.5f // Example float input for temperature
+        val weatherModelTestOutput = Array(1) { FloatArray(18) }
         weatherModel.run(weatherModelTestInput, weatherModelTestOutput)
-        Log.d("DEBUG", weatherModelTestOutput.toString())
+        Log.d("DEBUG", weatherModelTestOutput[0][0].toString())
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createUI()
