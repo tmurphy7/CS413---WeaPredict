@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
 
     private var temperatureModelName = "temperatureModel.tflite"
     private lateinit var temperatureModel: Interpreter
-    private var weatherModelName = "weatherModel.tflite"
+    private var weatherModelName = "weatherClass.tflite"
     private lateinit var weatherModel: Interpreter
 
     private val requestPermissionLauncher =
@@ -68,11 +68,11 @@ class MainActivity : ComponentActivity() {
         // Log.d("DEBUG", temperatureModelTestOutput.toString())
 
         // TODO: Weather code model testing for T
-        // weatherModel = ModelManager.loadModelFromAssetsFolder(weatherModelName, this)
-        // val weatherModelTestInput = currentDateTime
-        // val weatherModelTestOutput = FloatArray(1)
-        // weatherModel.run(weatherModelTestInput, weatherModelTestOutput)
-        // Log.d("DEBUG", weatherModelTestOutput.toString())
+        weatherModel = ModelManager.loadModelFromAssetsFolder(weatherModelName, this)
+        val weatherModelTestInput = 54.5 // Example float input for temperature
+        val weatherModelTestOutput = FloatArray(1)
+        weatherModel.run(weatherModelTestInput, weatherModelTestOutput)
+        Log.d("DEBUG", weatherModelTestOutput.toString())
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createUI()
