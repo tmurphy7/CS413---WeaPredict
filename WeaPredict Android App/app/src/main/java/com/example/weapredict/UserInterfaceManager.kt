@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import java.util.Calendar
+import java.util.stream.IntStream.range
 
 object UserInterfaceManager {
 
@@ -188,6 +192,38 @@ object UserInterfaceManager {
     fun FindLocationButton(onClick: () -> Unit) {
         Button(onClick = { onClick() }) {
             Text("Refresh Data")
+        }
+    }
+
+    @Composable
+    fun CustomWeatherSquares(){
+        //Display the weather for 7 day forecast
+        Row(modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .fillMaxWidth()) {
+
+            //able to have more  to display
+            val numSquares = 3
+
+            for(squares in range(0,numSquares)){
+                Card(
+                    modifier = Modifier
+                        .size(width = 210.dp, height = 190.dp)
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 5.dp),
+                        colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ){
+                    Text(
+                        text = "Test Square" + squares.toString(),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+            }
+
         }
     }
 }
