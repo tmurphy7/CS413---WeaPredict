@@ -78,6 +78,7 @@ object WeatherManager {
             else -> "Unknown"
         }
 
-        return WeatherInstance(weatherCondition, temperature)
+        // Set temperatureHigh AND temperatureLow as the "current" temperature
+        return WeatherInstance(weatherCondition, temperature, temperature)
     }
 }
