@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import java.util.Calendar
 
@@ -58,7 +57,7 @@ object UserInterfaceManager {
                         )
                     }
                     Text(
-                        text = "H: " + day.temperature_high.toString() + "\u00B0\n L:" + day.temperature_low + "\u00B0",
+                        text = "H: " + day.temperature_high.toString() + "\u00B0\n L: " + day.temperature_low + "\u00B0",
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -124,16 +123,16 @@ object UserInterfaceManager {
 
         var weatherObjectList: List<WeatherManager.WeatherInstance> = emptyList()
 
-        //add first day to list
-        val temperature_h = currentWeatherData.temperature_high
-        val temperature_l = currentWeatherData.temperature_low
-        val skies = currentWeatherData.weather_type
-        val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature_high = temperature_h, temperature_low = temperature_l, day = daysList[0])
+        // add first day to list
+        // val temperatureHigh = currentWeatherData.temperature_high
+        // val temperatureLow = currentWeatherData.temperature_low
+        // val skies = currentWeatherData.weather_type
+        // val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature_high = temperatureHigh, temperature_low = temperatureLow, day = daysList[0])
 
-        //drop first element from dayslist
-        daysList = daysList.drop(1)
+        // drop first element from dayslist
+        // daysList = daysList.drop(1)
 
-        weatherObjectList = weatherObjectList + todaysWeather
+        // weatherObjectList = weatherObjectList + todaysWeather
 //for loop through days creating weather objects and adding to list
         for(x in daysList){
             val nextDayTempH = 70.0 // predict temperature
