@@ -74,9 +74,7 @@ class MainActivity : ComponentActivity() {
         // TODO: Weather code model testing for T
         weatherModel = ModelManager.loadModelFromAssetsFolder(weatherModelName, this)
         val weatherModelTestInput = 54.5f // Example float input for temperature
-        val weatherModelTestOutput = Array(1) { FloatArray(18) }
-        weatherModel.run(weatherModelTestInput, weatherModelTestOutput)
-        Log.d("DEBUG", weatherModelTestOutput[0][0].toString())
+        Log.d("DEBUG", ModelManager.predictWeatherClass(weatherModelTestInput, weatherModel))
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createUI()
