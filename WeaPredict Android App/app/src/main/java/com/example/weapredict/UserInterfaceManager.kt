@@ -16,6 +16,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -26,13 +27,16 @@ import java.util.stream.IntStream.range
 object UserInterfaceManager {
 
     @Composable
-    fun DisplayDays(currentWeatherData : WeatherManager.WeatherInstance){
+    fun DisplayDays(
+        currentWeatherData: WeatherManager.WeatherInstance,
+        dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
+    ){
         //Display the weather for 7 day forecast
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
 
-            val weatherObjectDaysList = getDays(currentWeatherData)
+            val weatherObjectDaysList = getDays()
 
             for (day in weatherObjectDaysList) {
                 //set image for weather type
@@ -70,7 +74,9 @@ object UserInterfaceManager {
     }
 
     @Composable
-    fun DisplayHours(currentWeatherData : WeatherManager.WeatherInstance) {
+    fun DisplayHours(currentWeatherData : WeatherManager.WeatherInstance,
+                     hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
+    ){
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -112,7 +118,7 @@ object UserInterfaceManager {
         }
 
     }
-    private fun getDays(currentWeatherData : WeatherManager.WeatherInstance): List<WeatherManager.WeatherInstance>{
+    private fun getDays(): List<WeatherManager.WeatherInstance>{
         //create 7 weather objects and make predictions to fill weather
         val calendar = Calendar.getInstance()
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1

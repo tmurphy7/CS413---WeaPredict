@@ -2,12 +2,22 @@ package com.example.weapredict
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
 object ModelManager {
+    // Rebuild both lists with the latest information retrieved from models
+    fun refreshWeatherPredictions(
+        currentWeatherData: WeatherManager.WeatherInstance,
+        dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>,
+        hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
+    ){
+        // TODO: Rebuild both lists with the latest information retrieved from models
+    }
+
     // "modelPath" should be a string like "model.tflite", context should just be 'this' when called from MainActivity
     fun loadModelFromAssetsFolder(modelPath: String, context: Context): Interpreter {
         try {

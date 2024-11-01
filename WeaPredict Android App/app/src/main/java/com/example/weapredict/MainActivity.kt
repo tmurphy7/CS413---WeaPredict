@@ -8,20 +8,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +36,13 @@ class MainActivity : ComponentActivity() {
 
     private var currentWeatherData by mutableStateOf(WeatherManager.WeatherInstance())
     private var locationStringState by mutableStateOf("Checking permissions...")
+
+    private val hourlyWeatherDataList = mutableStateListOf<WeatherManager.WeatherInstance>().apply {
+            addAll(List(24) { WeatherManager.WeatherInstance() })
+    }
+    private val dailyWeatherDataList = mutableStateListOf<WeatherManager.WeatherInstance>().apply {
+        addAll(List(7) { WeatherManager.WeatherInstance() })
+    }
 
     private var locationServicesEnabled = true
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -142,7 +147,7 @@ class MainActivity : ComponentActivity() {
                                         style = MaterialTheme.typography.titleSmall,
                                         modifier = Modifier.padding(bottom = 8.dp)
                                     )
-                                    UserInterfaceManager.DisplayDays(currentWeatherData)
+                                    UserInterfaceManager.DisplayDays(currentWeatherData, dailyWeatherDataList)
                                 }
                             }
 
@@ -163,7 +168,7 @@ class MainActivity : ComponentActivity() {
                                         style = MaterialTheme.typography.titleSmall,
                                         modifier = Modifier.padding(bottom = 8.dp)
                                     )
-                                    UserInterfaceManager.DisplayHours(currentWeatherData)
+                                    UserInterfaceManager.DisplayHours(currentWeatherData, hourlyWeatherDataList)
                                 }
                             }
                             UserInterfaceManager.CustomWeatherSquares()
@@ -224,6 +229,7 @@ class MainActivity : ComponentActivity() {
                     WeatherManager.requestLiveWeatherData("$latitude", "$longitude") { weatherData ->
                         // Update the state variable directly
                         currentWeatherData = weatherData
+                        ModelManager.refreshWeatherPredictions(currentWeatherData, dailyWeatherDataList, hourlyWeatherDataList)
                     }
                 },
                 onFailure = { error ->
