@@ -30,6 +30,7 @@ import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import org.tensorflow.lite.Interpreter
+import java.util.Calendar
 import java.util.Date
 
 class MainActivity : ComponentActivity() {
@@ -47,7 +48,7 @@ class MainActivity : ComponentActivity() {
     private var locationServicesEnabled = true
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private var temperatureModelName = "temperatureModel.tflite"
+    private var temperatureModelName = "temperature_prediction_model.tflite"
     private lateinit var temperatureModel: Interpreter
     private var weatherModelName = "weatherClass.tflite"
     private lateinit var weatherModel: Interpreter
@@ -69,17 +70,15 @@ class MainActivity : ComponentActivity() {
         val currentDateTime = Date()
         Log.d("DEBUG", currentDateTime.toString())
 
-        // TODO: Temperature model testing for R
-        // temperatureModel = ModelManager.loadModelFromAssetsFolder(temperatureModelName, this)
-        // val temperatureModelTestInput = currentDateTime
-        // val temperatureModelTestOutput = FloatArray(1)
-        // temperatureModel.run(temperatureModelTestInput, temperatureModelTestOutput)
-        // Log.d("DEBUG", temperatureModelTestOutput.toString())
+        // Temperature and weather model testing
+        temperatureModel = ModelManager.loadModelFromAssetsFolder(temperatureModelName, this)
+        val temperatureModelTestOutput = ModelManager.predictTemperature(currentDateTime, temperatureModel)
+        Log.d("DEBUG", "Temp Output: ${temperatureModelTestOutput[0][0]}")
 
-        // TODO: Weather code model testing for T
         weatherModel = ModelManager.loadModelFromAssetsFolder(weatherModelName, this)
-        val weatherModelTestInput = 54.5f // Example float input for temperature
-        Log.d("DEBUG", ModelManager.predictWeatherClass(weatherModelTestInput, weatherModel))
+        val weatherModelTestInput = temperatureModelTestOutput[0][0]
+        val weatherModelTestOutput = ModelManager.predictWeatherClass(weatherModelTestInput, weatherModel)
+        Log.d("DEBUG", "Weather Output: $weatherModelTestOutput")
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createUI()

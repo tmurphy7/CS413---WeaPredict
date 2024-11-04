@@ -7,6 +7,8 @@ import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import java.util.Calendar
+import java.util.Date
 
 object ModelManager {
     // Rebuild both lists with the latest information retrieved from models
@@ -37,6 +39,21 @@ object ModelManager {
         val startOffset = fileDescriptor.startOffset
         val declaredLength = fileDescriptor.declaredLength
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+    }
+
+    fun predictTemperature(modelInput: Date, temperatureModel: Interpreter): Array<FloatArray> {
+        // Convert Date into an array of floats
+        val calendar = Calendar.getInstance().apply { time = modelInput }
+        val timeFeatures = Array(1) { FloatArray(4) }.apply {
+            this[0][0] = calendar.get(Calendar.HOUR_OF_DAY).toFloat() / 24f
+            this[0][1] = calendar.get(Calendar.DAY_OF_MONTH).toFloat() / 31f
+            this[0][2] = (calendar.get(Calendar.MONTH) + 1).toFloat() / 12f
+            this[0][3] = calendar.get(Calendar.YEAR).toFloat() / 2024f // May need to change
+        }
+        // Run model and return output
+        val temperatureModelTestOutput = Array(1) { FloatArray(1) }
+        temperatureModel.run(timeFeatures, temperatureModelTestOutput)
+        return temperatureModelTestOutput
     }
 
     fun predictWeatherClass(modelInput: Float, weatherModel: Interpreter): String {
