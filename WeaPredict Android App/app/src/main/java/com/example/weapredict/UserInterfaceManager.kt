@@ -36,7 +36,7 @@ object UserInterfaceManager {
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
 
-            val weatherObjectDaysList = getDays()
+            val weatherObjectDaysList = getDays(dailyWeatherDataList)
 
             for (day in weatherObjectDaysList) {
                 //set image for weather type
@@ -81,7 +81,7 @@ object UserInterfaceManager {
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
 
-            val weatherObjectHourList = getHours(currentWeatherData)
+            val weatherObjectHourList = getHours(currentWeatherData, hourlyWeatherDataList)
             //set image for weather type
             for (hour in weatherObjectHourList) {
                 val weatherCondition = when (hour.weather_type) {
@@ -118,7 +118,9 @@ object UserInterfaceManager {
         }
 
     }
-    private fun getDays(): List<WeatherManager.WeatherInstance>{
+    private fun getDays(
+        dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
+    ): List<WeatherManager.WeatherInstance>{
         //create 7 weather objects and make predictions to fill weather
         val calendar = Calendar.getInstance()
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
@@ -133,29 +135,28 @@ object UserInterfaceManager {
 
         var weatherObjectList: List<WeatherManager.WeatherInstance> = emptyList()
 
-        // add first day to list
-        // val temperatureHigh = currentWeatherData.temperature_high
-        // val temperatureLow = currentWeatherData.temperature_low
-        // val skies = currentWeatherData.weather_type
-        // val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature_high = temperatureHigh, temperature_low = temperatureLow, day = daysList[0])
-
-        // drop first element from dayslist
-        // daysList = daysList.drop(1)
-
-        // weatherObjectList = weatherObjectList + todaysWeather
-//for loop through days creating weather objects and adding to list
-        for(x in daysList){
-            val nextDayTempH = 70.0 // predict temperature
-            val nextDayTempL = 50.0
-            val nextDaySkies = "Rain" // predict conditions
-            val nextDayWeather = WeatherManager.WeatherInstance(weather_type = nextDaySkies,temperature_high = nextDayTempH, temperature_low = nextDayTempL, day = x)
+        //for loop through days creating weather objects and adding to list
+        for(day in 0 until 7){
+            var nextDayTempH = dailyWeatherDataList[day].temperature_high
+            nextDayTempH = String.format("%.1f", nextDayTempH.toFloat()).toDouble()
+            var nextDayTempL = dailyWeatherDataList[day].temperature_low
+            nextDayTempL = String.format("%.1f", nextDayTempL.toFloat()).toDouble()
+            val nextDaySkies = dailyWeatherDataList[day].weather_type
+            val nextDayWeather = WeatherManager.WeatherInstance(
+                weather_type = nextDaySkies,
+                temperature_high = nextDayTempH,
+                temperature_low = nextDayTempL,
+                day = daysList[day])
             weatherObjectList = weatherObjectList + nextDayWeather
         }
 
         return weatherObjectList
     }
 
-    private fun getHours(currentWeatherData : WeatherManager.WeatherInstance): List<WeatherManager.WeatherInstance>{
+    private fun getHours(
+        currentWeatherData : WeatherManager.WeatherInstance,
+        hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
+    ): List<WeatherManager.WeatherInstance>{
         var hoursList = listOf("12AM","1AM","2AM","3AM","4AM","5AM","6AM","7AM","8AM","9AM","10AM","11AM","12PM","1PM",
             "2PM","3PM","4PM","5PM","6PM","7PM","8PM","9PM","10PM","11PM")
 
@@ -183,11 +184,18 @@ object UserInterfaceManager {
 
         weatherObjectList = weatherObjectList + todaysWeather
 
-        for(x in hoursList){
-            val nextDayTempH = 70.0 // predict temperature
-            val nextDaySkies = "Rain" // predict conditions
-            val nextDayWeather = WeatherManager.WeatherInstance(weather_type = nextDaySkies,temperature_high = nextDayTempH, hour = x)
-            weatherObjectList = weatherObjectList + nextDayWeather
+        for(hour in 1 until 23){
+            var nextHourTempH = hourlyWeatherDataList[hour].temperature_high
+            nextHourTempH = String.format("%.1f", nextHourTempH.toFloat()).toDouble()
+            var nextHourTempL = hourlyWeatherDataList[hour].temperature_low
+            nextHourTempL = String.format("%.1f", nextHourTempL.toFloat()).toDouble()
+            val nextHourSkies = hourlyWeatherDataList[hour].weather_type
+            val nextHourWeather = WeatherManager.WeatherInstance(
+                weather_type = nextHourSkies,
+                temperature_high = nextHourTempH,
+                temperature_low = nextHourTempL,
+                day = hoursList[hour])
+            weatherObjectList = weatherObjectList + nextHourWeather
         }
 
         return weatherObjectList

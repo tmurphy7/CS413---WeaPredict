@@ -48,11 +48,6 @@ class MainActivity : ComponentActivity() {
     private var locationServicesEnabled = true
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private var temperatureModelName = "temperature_prediction_model.tflite"
-    private lateinit var temperatureModel: Interpreter
-    private var weatherModelName = "weatherClass.tflite"
-    private lateinit var weatherModel: Interpreter
-
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
@@ -66,19 +61,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WeatherManager.initialize(this)
-
-        val currentDateTime = Date()
-        Log.d("DEBUG", currentDateTime.toString())
-
-        // Temperature and weather model testing
-        temperatureModel = ModelManager.loadModelFromAssetsFolder(temperatureModelName, this)
-        val temperatureModelTestOutput = ModelManager.predictTemperature(currentDateTime, temperatureModel)
-        Log.d("DEBUG", "Temp Output: ${temperatureModelTestOutput[0][0]}")
-
-        weatherModel = ModelManager.loadModelFromAssetsFolder(weatherModelName, this)
-        val weatherModelTestInput = temperatureModelTestOutput[0][0]
-        val weatherModelTestOutput = ModelManager.predictWeatherClass(weatherModelTestInput, weatherModel)
-        Log.d("DEBUG", "Weather Output: $weatherModelTestOutput")
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createUI()
@@ -228,7 +210,7 @@ class MainActivity : ComponentActivity() {
                     WeatherManager.requestLiveWeatherData("$latitude", "$longitude") { weatherData ->
                         // Update the state variable directly
                         currentWeatherData = weatherData
-                        ModelManager.refreshWeatherPredictions(currentWeatherData, dailyWeatherDataList, hourlyWeatherDataList)
+                        ModelManager.refreshWeatherPredictions(this, currentWeatherData, dailyWeatherDataList, hourlyWeatherDataList)
                     }
                 },
                 onFailure = { error ->
