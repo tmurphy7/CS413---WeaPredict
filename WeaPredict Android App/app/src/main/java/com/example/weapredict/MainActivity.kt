@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.padding(24.dp)
                             ) {
                                 Text(
-                                    text = "Current Weather",
+                                    text = locationStringState,
                                     style = MaterialTheme.typography.titleSmall,
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
@@ -221,6 +221,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun updateLocationString(newLocation: String) {
-        locationStringState = "Location: $newLocation"
+        locationStringState = "Current weather in $newLocation"
     }
 }

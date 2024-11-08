@@ -1,5 +1,6 @@
 package com.example.weapredict
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -194,7 +195,7 @@ object UserInterfaceManager {
                 weather_type = nextHourSkies,
                 temperature_high = nextHourTempH,
                 temperature_low = nextHourTempL,
-                day = hoursList[hour])
+                hour = hoursList[hour])
             weatherObjectList = weatherObjectList + nextHourWeather
         }
 
