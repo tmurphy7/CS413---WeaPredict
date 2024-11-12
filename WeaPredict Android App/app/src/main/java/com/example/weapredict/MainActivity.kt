@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
 
     private var currentWeatherData by mutableStateOf(WeatherManager.WeatherInstance())
     private var locationStringState by mutableStateOf("Checking permissions...")
+    private var additionalWeatherData by mutableStateOf(WeatherManager.AdditionalDataInstance())
 
     private val hourlyWeatherDataList = mutableStateListOf<WeatherManager.WeatherInstance>().apply {
             addAll(List(24) { WeatherManager.WeatherInstance() })
@@ -219,6 +220,11 @@ class MainActivity : ComponentActivity() {
                         // Update the state variable directly
                         currentWeatherData = weatherData
                         ModelManager.refreshWeatherPredictions(this, currentWeatherData, dailyWeatherDataList, hourlyWeatherDataList)
+                    }
+
+                    WeatherManager.requestAdditionalData("$latitude", "$longitude") { additionalData ->
+                        // Update the state variable directly
+                        additionalWeatherData = additionalData
                     }
                 },
                 onFailure = { error ->
