@@ -210,32 +210,50 @@ object UserInterfaceManager {
     }
 
     @Composable
-    fun CustomWeatherSquares(){
+    fun CustomWeatherSquares(settings: Settings){
         //Display the weather for 7 day forecast
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
 
             //able to have more  to display
-            val numSquares = 3
+            settings.loadSettings()
+            val num_squares = settings.number_of_widgets
+            val square_list = settings.list_of_widgets
 
-            for(squares in range(0,numSquares)){
-                Card(
-                    modifier = Modifier
-                        .size(width = 210.dp, height = 190.dp)
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                        .padding(horizontal = 5.dp),
+            for(squares in range(0,num_squares)){
+                   Card(
+                        modifier = Modifier
+                            .size(width = 210.dp, height = 190.dp)
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                            .padding(horizontal = 5.dp),
                         colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ){
-                    Text(
-                        text = "Test Square" + squares.toString(),
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ){
+                        Text(
+                            text = square_list[squares],
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+            }
+            Card(
+                modifier = Modifier
+                    .size(width = 210.dp, height = 190.dp)
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 5.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ){
+                Text(
+                    text = "ADD BUTTON PLACEHOLDER",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
             }
 
         }

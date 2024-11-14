@@ -1,6 +1,7 @@
 package com.example.weapredict
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +34,12 @@ import com.google.android.gms.location.LocationServices
 import org.tensorflow.lite.Interpreter
 import java.util.Calendar
 import java.util.Date
+import java.util.prefs.Preferences
+
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var user_settings: Settings
 
     private var currentWeatherData by mutableStateOf(WeatherManager.WeatherInstance())
     private var locationStringState by mutableStateOf("Checking permissions...")
@@ -44,6 +50,8 @@ class MainActivity : ComponentActivity() {
     private val dailyWeatherDataList = mutableStateListOf<WeatherManager.WeatherInstance>().apply {
         addAll(List(7) { WeatherManager.WeatherInstance() })
     }
+
+
 
     private var locationServicesEnabled = true
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -61,8 +69,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WeatherManager.initialize(this)
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        user_settings = Settings(this)
         createUI()
         checkPermissionAndFetchLocation()
     }
@@ -152,7 +160,7 @@ class MainActivity : ComponentActivity() {
                                     UserInterfaceManager.DisplayHours(currentWeatherData, hourlyWeatherDataList)
                                 }
                             }
-                            UserInterfaceManager.CustomWeatherSquares()
+                            UserInterfaceManager.CustomWeatherSquares(user_settings)
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
