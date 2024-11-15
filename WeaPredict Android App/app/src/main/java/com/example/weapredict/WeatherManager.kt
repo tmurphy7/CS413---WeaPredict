@@ -7,6 +7,8 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object WeatherManager {
 
@@ -17,6 +19,12 @@ object WeatherManager {
         var day: String = "Unknownsday", // Unsure if day and time will be needed
         var time: String = "99:99",
         var hour: String = "1AM"
+    )
+
+    data class AdditionalDataInstance(
+        var wind_speed: Double = 0.0,
+        var sunrise: String = "99:99",
+        var sunset: String = "99:99"
     )
 
     private lateinit var requestQueue: RequestQueue
@@ -80,5 +88,56 @@ object WeatherManager {
 
         // Set temperatureHigh AND temperatureLow as the "current" temperature
         return WeatherInstance(weatherCondition, temperature, temperature)
+    }
+
+    fun requestAdditionalData(latitude: String, longitude: String, callback: (AdditionalDataInstance) -> Unit) {
+        if (!::requestQueue.isInitialized) {
+            throw IllegalStateException("RequestQueue not initialized. Call WeatherFinder.initialize(context) first.")
+        }
+
+        // Request additional data for a specific region
+        val baseUrl = "https://api.open-meteo.com/v1/forecast"
+        val locationParams = "latitude=$latitude&longitude=$longitude"
+        val currentParams = "current=wind_speed_10m&daily=sunrise,sunset"
+        val additionalParams = "timezone=auto&temperature_unit=fahrenheit"
+
+        val url = "$baseUrl?$locationParams&$currentParams&$additionalParams"
+
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                val parsedData = parseAdditionalDataResponse(response)
+                callback(parsedData)
+            },
+            { error ->
+                Log.d("Debug", "Error: ${error.toString()}")
+                callback(AdditionalDataInstance())
+            }
+        )
+
+        requestQueue.add(jsonObjectRequest)
+    }
+
+    private fun parseAdditionalDataResponse(response: JSONObject): AdditionalDataInstance {
+        val current = response.getJSONObject("current")
+        val windSpeed = current.getDouble("wind_speed_10m")
+
+        val daily = response.getJSONObject("daily")
+        val sunriseArray = daily.getJSONArray("sunrise")
+        val sunrise = extractTime(sunriseArray.getString(0))
+        val sunsetArray = daily.getJSONArray("sunset")
+        val sunset = extractTime(sunsetArray.getString(0))
+
+        return AdditionalDataInstance(windSpeed, sunrise, sunset)
+    }
+
+    fun extractTime(datetime: String): String {
+        // Define the input format to parse the datetime string
+        val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+        val dateTime = LocalDateTime.parse(datetime, inputFormatter)
+
+        // Define the output format to only display the time
+        val outputFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        return dateTime.format(outputFormatter)
     }
 }

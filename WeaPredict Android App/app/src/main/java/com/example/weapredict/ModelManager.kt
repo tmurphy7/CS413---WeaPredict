@@ -12,7 +12,7 @@ import java.util.Date
 
 object ModelManager {
 
-    private var temperatureModelName = "temperature_prediction_model.tflite"
+    private var temperatureModelName = "Temperature.tflite"
     private lateinit var temperatureModel: Interpreter
     private var weatherModelName = "weatherClass.tflite"
     private lateinit var weatherModel: Interpreter

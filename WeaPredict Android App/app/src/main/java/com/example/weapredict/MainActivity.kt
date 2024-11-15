@@ -31,6 +31,14 @@ import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import android.location.Location
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
+import java.io.OutputStreamWriter
 import org.tensorflow.lite.Interpreter
 import java.util.Calendar
 import java.util.Date
@@ -43,6 +51,7 @@ class MainActivity : ComponentActivity() {
 
     private var currentWeatherData by mutableStateOf(WeatherManager.WeatherInstance())
     private var locationStringState by mutableStateOf("Checking permissions...")
+    private var additionalWeatherData by mutableStateOf(WeatherManager.AdditionalDataInstance())
 
     private val hourlyWeatherDataList = mutableStateListOf<WeatherManager.WeatherInstance>().apply {
             addAll(List(24) { WeatherManager.WeatherInstance() })
@@ -219,6 +228,11 @@ class MainActivity : ComponentActivity() {
                         // Update the state variable directly
                         currentWeatherData = weatherData
                         ModelManager.refreshWeatherPredictions(this, currentWeatherData, dailyWeatherDataList, hourlyWeatherDataList)
+                    }
+
+                    WeatherManager.requestAdditionalData("$latitude", "$longitude") { additionalData ->
+                        // Update the state variable directly
+                        additionalWeatherData = additionalData
                     }
                 },
                 onFailure = { error ->
