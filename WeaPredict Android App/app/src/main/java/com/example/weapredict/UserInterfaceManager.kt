@@ -69,35 +69,97 @@ object UserInterfaceManager {
                      additionalWeatherData : WeatherManager.AdditionalDataInstance,
                      hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
     ){
-        val sunrise = additionalWeatherData.sunrise // Formatted as string, XX:XX
-        val sunset = additionalWeatherData.sunset
+        // Get information needed for sunrise/sunset
+        val sunriseTime = additionalWeatherData.sunrise // Formatted as string, XX:XX
+        val sunriseHour = sunriseTime.split(":")[0].toInt() // Just the first integer (01:39 becomes 1)
+        val sunsetTime = additionalWeatherData.sunset
+        val sunsetHour = sunsetTime.split(":")[0].toInt()
+
+        // Prepare to create UI object
+        val weatherObjectHourList = getHours(currentWeatherData, hourlyWeatherDataList)
+        var sunriseNotWritten = true
+        var sunsetNotWritten = true
 
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
 
-            val weatherObjectHourList = getHours(currentWeatherData, hourlyWeatherDataList)
-            //set image for weather type
-            for (hour in weatherObjectHourList) {
-                val weatherCondition = getDrawableWeatherImage(hour.weather_type, true)
+            var i = 0
+            while (i < 24) {
+                val hour = weatherObjectHourList[i]
+                val hourInt = convertHourToInteger(hour.hour)
 
-                Column(modifier = Modifier.padding(8.dp)) {
-                    Text(
-                        text = hour.hour,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    Box(modifier = Modifier.height(50.dp)) {
-                        Image(
-                            modifier = Modifier.size(60.dp),
-                            contentDescription = "Weather Image",
-                            contentScale = ContentScale.Crop,
-                            painter = painterResource(weatherCondition)
+                if (hourInt == sunriseHour + 1 && sunriseNotWritten) // If the sunrise needs to be printed
+                {
+                    val sunriseImage = getDrawableWeatherImage("Clear sky", true)
+
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = convertTo12HourFormat(sunriseTime),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        Box(modifier = Modifier.height(50.dp)) {
+                            Image(
+                                modifier = Modifier.size(60.dp),
+                                contentDescription = "Weather Image",
+                                contentScale = ContentScale.Crop,
+                                painter = painterResource(sunriseImage)
+                            )
+                        }
+                        Text(
+                            text = "Sunrise",
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
-                    Text(
-                        text = hour.temperature_high.toString() + "\u00B0",
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    sunriseNotWritten = false
+                }
+                else if (hourInt == sunsetHour + 1 && sunsetNotWritten)
+                {
+                    val sunsetImage = getDrawableWeatherImage("Clear sky", false)
+
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = convertTo12HourFormat(sunsetTime),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        Box(modifier = Modifier.height(50.dp)) {
+                            Image(
+                                modifier = Modifier.size(60.dp),
+                                contentDescription = "Weather Image",
+                                contentScale = ContentScale.Crop,
+                                painter = painterResource(sunsetImage)
+                            )
+                        }
+                        Text(
+                            text = "Sunset",
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    sunsetNotWritten = false
+                }
+                else // Just print the hour as usual
+                {
+                    val weatherCondition = getDrawableWeatherImage(hour.weather_type, true)
+
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = hour.hour,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        Box(modifier = Modifier.height(50.dp)) {
+                            Image(
+                                modifier = Modifier.size(60.dp),
+                                contentDescription = "Weather Image",
+                                contentScale = ContentScale.Crop,
+                                painter = painterResource(weatherCondition)
+                            )
+                        }
+                        Text(
+                            text = hour.temperature_high.toString() + "\u00B0",
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    i++
                 }
             }
         }
@@ -162,15 +224,13 @@ object UserInterfaceManager {
         var hoursList = listOf("12AM","1AM","2AM","3AM","4AM","5AM","6AM","7AM","8AM","9AM","10AM","11AM","12PM","1PM",
             "2PM","3PM","4PM","5PM","6PM","7PM","8PM","9PM","10PM","11PM")
 
-        //get current hour
+        // Get current hour and weather data
         val currentTime = Calendar.getInstance()
         val currentHour = currentTime.get(Calendar.HOUR_OF_DAY)
-
-        //get current weather
         val temperature_h = currentWeatherData.temperature_high
         val skies = currentWeatherData.weather_type
 
-        //sort list of hours into correct order
+        // Sort list of hours into correct order
         if(currentHour != 0) {
             val hoursListSecondHalf = hoursList.subList(0, currentHour)
             val hoursListFirstHalf = hoursList.subList(currentHour, hoursList.size)
@@ -178,15 +238,20 @@ object UserInterfaceManager {
         }
 
         var weatherObjectList: List<WeatherManager.WeatherInstance> = emptyList()
-        //for loop through days creating weather objects and adding to list
-        val todaysWeather = WeatherManager.WeatherInstance(weather_type = skies,temperature_high = temperature_h, hour = hoursList[0])
 
-        //drop first element from hourslist
-        hoursList = hoursList.drop(1)
+        val todaysWeather = WeatherManager.WeatherInstance(
+            weather_type = skies,
+            temperature_high = temperature_h,
+            hour = hoursList[0]
+        )
+
+        // TODO: Review getHours()
+        // Drop first element from hourslist - seems to break code?
+        // hoursList = hoursList.drop(1)
 
         weatherObjectList = weatherObjectList + todaysWeather
 
-        for(hour in 1 until 23){
+        for(hour in 1 until 24){
             var nextHourTempH = hourlyWeatherDataList[hour].temperature_high
             nextHourTempH = String.format("%.1f", nextHourTempH.toFloat()).toDouble()
             var nextHourTempL = hourlyWeatherDataList[hour].temperature_low
@@ -258,5 +323,49 @@ object UserInterfaceManager {
             }
 
         }
+    }
+
+    private fun convertHourToInteger(hourString: String): Int {
+        // Extract the numeric part and the AM/PM part
+        val regex = Regex("(\\d+)(AM|PM)")
+        val match = regex.matchEntire(hourString.trim().uppercase())
+
+        // Convert string into an integer 0-23
+        if (match != null) {
+            val (hour, period) = match.destructured
+            val hourInt = hour.toInt()
+
+            return when (period) {
+                "AM" -> if (hourInt == 12) 0 else hourInt
+                "PM" -> if (hourInt == 12) 12 else hourInt + 12
+                else -> 0 // Default value
+            }
+        }
+        else
+        {
+            return 0
+        }
+    }
+
+    fun convertTo12HourFormat(time: String): String {
+        // Split the input string into hour and minute
+        val parts = time.split(":")
+        val hour = parts[0].toInt()
+        val minute = parts[1]
+
+        // Determine AM or PM
+        val amPm = if (hour < 12) "AM" else "PM"
+
+        // Convert the hour to 12-hour format
+        val hour12 = if (hour == 0) {
+            12
+        } else if (hour > 12) {
+            hour - 12
+        } else {
+            hour
+        }
+
+        // Return the formatted time string
+        return "$hour12:$minute$amPm"
     }
 }
