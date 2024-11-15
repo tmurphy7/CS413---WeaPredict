@@ -1,5 +1,7 @@
 package com.example.weapredict
 
+import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
@@ -22,16 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import java.util.Calendar
 import java.util.stream.IntStream.range
 
 object UserInterfaceManager {
 
     @Composable
-    fun DisplayDays(
-        currentWeatherData: WeatherManager.WeatherInstance,
-        dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
-    ){
+    fun DisplayDays(dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>){
         //Display the weather for 7 day forecast
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
@@ -41,17 +41,7 @@ object UserInterfaceManager {
 
             for (day in weatherObjectDaysList) {
                 //set image for weather type
-                val weatherCondition = when (day.weather_type) {
-                    "Clear sky" -> R.drawable.sun
-                    "Partly cloudy" -> R.drawable.parlycloudy
-                    "Foggy" -> R.drawable.fog
-                    "Drizzle" -> R.drawable.lightrain
-                    "Rain showers","Rain" -> R.drawable.heavyrain
-                    "Snow","Snow showers","Snow grains" -> R.drawable.snow
-                    "Thunderstorm" -> R.drawable.storm
-                    "Thunderstorm with hail" -> R.drawable.stormwithheavyrain
-                    else -> R.drawable.sun
-                }
+                val weatherCondition = getDrawableWeatherImage(day.weather_type, true)
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = day.day,
@@ -76,8 +66,12 @@ object UserInterfaceManager {
 
     @Composable
     fun DisplayHours(currentWeatherData : WeatherManager.WeatherInstance,
+                     additionalWeatherData : WeatherManager.AdditionalDataInstance,
                      hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
     ){
+        val sunrise = additionalWeatherData.sunrise // Formatted as string, XX:XX
+        val sunset = additionalWeatherData.sunset
+
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -85,17 +79,7 @@ object UserInterfaceManager {
             val weatherObjectHourList = getHours(currentWeatherData, hourlyWeatherDataList)
             //set image for weather type
             for (hour in weatherObjectHourList) {
-                val weatherCondition = when (hour.weather_type) {
-                    "Clear sky" -> R.drawable.sun
-                    "Partly cloudy" -> R.drawable.parlycloudy
-                    "Foggy" -> R.drawable.fog
-                    "Drizzle" -> R.drawable.lightrain
-                    "Rain showers","Rain" -> R.drawable.heavyrain
-                    "Snow","Snow showers","Snow grains" -> R.drawable.snow
-                    "Thunderstorm" -> R.drawable.storm
-                    "Thunderstorm with hail" -> R.drawable.stormwithheavyrain
-                    else -> R.drawable.sun
-                }
+                val weatherCondition = getDrawableWeatherImage(hour.weather_type, true)
 
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
@@ -117,8 +101,25 @@ object UserInterfaceManager {
                 }
             }
         }
-
     }
+
+    fun getDrawableWeatherImage(weatherType : String, isDaytime : Boolean): Int
+    {
+        val weatherCondition = when (weatherType) {
+            "Clear sky" -> R.drawable.sun
+            "Partly cloudy" -> R.drawable.parlycloudy
+            "Foggy" -> R.drawable.fog
+            "Drizzle" -> R.drawable.lightrain
+            "Rain showers", "Rain" -> R.drawable.heavyrain
+            "Snow", "Snow showers", "Snow grains" -> R.drawable.snow
+            "Thunderstorm" -> R.drawable.storm
+            "Thunderstorm with hail" -> R.drawable.stormwithheavyrain
+            else -> R.drawable.sun
+        }
+
+        return weatherCondition
+    }
+
     private fun getDays(
         dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
     ): List<WeatherManager.WeatherInstance>{

@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
                                         style = MaterialTheme.typography.titleSmall,
                                         modifier = Modifier.padding(bottom = 8.dp)
                                     )
-                                    UserInterfaceManager.DisplayDays(currentWeatherData, dailyWeatherDataList)
+                                    UserInterfaceManager.DisplayDays(dailyWeatherDataList)
                                 }
                             }
 
@@ -166,7 +166,10 @@ class MainActivity : ComponentActivity() {
                                         style = MaterialTheme.typography.titleSmall,
                                         modifier = Modifier.padding(bottom = 8.dp)
                                     )
-                                    UserInterfaceManager.DisplayHours(currentWeatherData, hourlyWeatherDataList)
+                                    UserInterfaceManager.DisplayHours(
+                                        currentWeatherData,
+                                        additionalWeatherData,
+                                        hourlyWeatherDataList)
                                 }
                             }
                             UserInterfaceManager.CustomWeatherSquares(user_settings)
