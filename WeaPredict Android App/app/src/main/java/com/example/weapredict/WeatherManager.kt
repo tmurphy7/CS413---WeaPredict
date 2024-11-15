@@ -140,4 +140,9 @@ object WeatherManager {
         val outputFormatter = DateTimeFormatter.ofPattern("HH:mm")
         return dateTime.format(outputFormatter)
     }
+
+    fun isDaytime(sunrise: Int, sunset: Int, currentHour: Int): Boolean {
+        Log.d("DEBUG", "Sunrise: $sunrise, current: $currentHour, sunset: $sunset")
+        return currentHour in (sunrise + 1) until sunset
+    }
 }

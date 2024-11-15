@@ -68,10 +68,11 @@ object UserInterfaceManager {
     fun DisplayHours(currentWeatherData : WeatherManager.WeatherInstance,
                      additionalWeatherData : WeatherManager.AdditionalDataInstance,
                      hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
-    ){
+    ) {
         // Get information needed for sunrise/sunset
         val sunriseTime = additionalWeatherData.sunrise // Formatted as string, XX:XX
-        val sunriseHour = sunriseTime.split(":")[0].toInt() // Just the first integer (01:39 becomes 1)
+        val sunriseHour =
+            sunriseTime.split(":")[0].toInt() // Just the first integer (01:39 becomes 1)
         val sunsetTime = additionalWeatherData.sunset
         val sunsetHour = sunsetTime.split(":")[0].toInt()
 
@@ -79,10 +80,17 @@ object UserInterfaceManager {
         val weatherObjectHourList = getHours(currentWeatherData, hourlyWeatherDataList)
         var sunriseNotWritten = true
         var sunsetNotWritten = true
+        var isCurrentlyDaytime = WeatherManager.isDaytime(
+            sunriseHour,
+            sunsetHour,
+            convertHourToInteger(weatherObjectHourList[0].hour)
+        )
 
-        Row(modifier = Modifier
-            .horizontalScroll(rememberScrollState())
-            .fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .fillMaxWidth()
+        ) {
 
             var i = 0
             while (i < 24) {
@@ -91,7 +99,7 @@ object UserInterfaceManager {
 
                 if (hourInt == sunriseHour + 1 && sunriseNotWritten) // If the sunrise needs to be printed
                 {
-                    val sunriseImage = getDrawableWeatherImage("Clear sky", true)
+                    val sunriseImage = getDrawableWeatherImage("Sunrise", true)
 
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
@@ -112,10 +120,9 @@ object UserInterfaceManager {
                         )
                     }
                     sunriseNotWritten = false
-                }
-                else if (hourInt == sunsetHour + 1 && sunsetNotWritten)
-                {
-                    val sunsetImage = getDrawableWeatherImage("Clear sky", false)
+                    isCurrentlyDaytime = true
+                } else if (hourInt == sunsetHour + 1 && sunsetNotWritten) {
+                    val sunsetImage = getDrawableWeatherImage("Sunset", true)
 
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
@@ -136,10 +143,11 @@ object UserInterfaceManager {
                         )
                     }
                     sunsetNotWritten = false
-                }
-                else // Just print the hour as usual
+                    isCurrentlyDaytime = false
+                } else // Just print the hour as usual
                 {
-                    val weatherCondition = getDrawableWeatherImage(hour.weather_type, true)
+                    val weatherCondition =
+                        getDrawableWeatherImage(hour.weather_type, isCurrentlyDaytime)
 
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
@@ -168,39 +176,40 @@ object UserInterfaceManager {
     fun getDrawableWeatherImage(weatherType : String, isDaytime : Boolean): Int
     {
         val weatherCondition = when (weatherType) {
-            "Clear sky" -> R.drawable.sun
-            "Partly cloudy" -> R.drawable.parlycloudy
-            "Foggy" -> R.drawable.fog
+            "Clear sky" -> if (isDaytime) R.drawable.sun else R.drawable.snow
+            "Partly cloudy" -> if (isDaytime) R.drawable.parlycloudy else R.drawable.snow
+            "Foggy" -> if (isDaytime) R.drawable.fog else R.drawable.snow
             "Drizzle" -> R.drawable.lightrain
             "Rain showers", "Rain" -> R.drawable.heavyrain
             "Snow", "Snow showers", "Snow grains" -> R.drawable.snow
             "Thunderstorm" -> R.drawable.storm
             "Thunderstorm with hail" -> R.drawable.stormwithheavyrain
+            "Sunrise" -> R.drawable.sun
+            "Sunset" -> R.drawable.sun
             else -> R.drawable.sun
         }
-
         return weatherCondition
     }
 
     private fun getDays(
         dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
-    ): List<WeatherManager.WeatherInstance>{
+    ): List<WeatherManager.WeatherInstance> {
         //create 7 weather objects and make predictions to fill weather
         val calendar = Calendar.getInstance()
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
         var daysList = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
         //Split the list to start from today
-        if(dayOfWeek != 0){
-            val daysListSecondHalf = daysList.subList(0,dayOfWeek - 1)
-            val daysListFirstHalf = daysList.subList(dayOfWeek - 1,daysList.size)
+        if (dayOfWeek != 0) {
+            val daysListSecondHalf = daysList.subList(0, dayOfWeek - 1)
+            val daysListFirstHalf = daysList.subList(dayOfWeek - 1, daysList.size)
             daysList = daysListFirstHalf + daysListSecondHalf
         }
 
         var weatherObjectList: List<WeatherManager.WeatherInstance> = emptyList()
 
         //for loop through days creating weather objects and adding to list
-        for(day in 0 until 7){
+        for (day in 0 until 7) {
             var nextDayTempH = dailyWeatherDataList[day].temperature_high
             nextDayTempH = String.format("%.1f", nextDayTempH.toFloat()).toDouble()
             var nextDayTempL = dailyWeatherDataList[day].temperature_low
@@ -210,7 +219,8 @@ object UserInterfaceManager {
                 weather_type = nextDaySkies,
                 temperature_high = nextDayTempH,
                 temperature_low = nextDayTempL,
-                day = daysList[day])
+                day = daysList[day]
+            )
             weatherObjectList = weatherObjectList + nextDayWeather
         }
 
