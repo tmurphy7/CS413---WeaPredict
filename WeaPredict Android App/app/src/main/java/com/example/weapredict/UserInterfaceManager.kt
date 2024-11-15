@@ -176,16 +176,16 @@ object UserInterfaceManager {
     fun getDrawableWeatherImage(weatherType : String, isDaytime : Boolean): Int
     {
         val weatherCondition = when (weatherType) {
-            "Clear sky" -> if (isDaytime) R.drawable.sun else R.drawable.snow
-            "Partly cloudy" -> if (isDaytime) R.drawable.parlycloudy else R.drawable.snow
-            "Foggy" -> if (isDaytime) R.drawable.fog else R.drawable.snow
+            "Clear sky" -> if (isDaytime) R.drawable.sun else R.drawable.moon
+            "Partly cloudy" -> if (isDaytime) R.drawable.parlycloudy else R.drawable.partlycloudymoon
+            "Foggy" -> if (isDaytime) R.drawable.fog else R.drawable.fogmoon
             "Drizzle" -> R.drawable.lightrain
             "Rain showers", "Rain" -> R.drawable.heavyrain
             "Snow", "Snow showers", "Snow grains" -> R.drawable.snow
             "Thunderstorm" -> R.drawable.storm
             "Thunderstorm with hail" -> R.drawable.stormwithheavyrain
-            "Sunrise" -> R.drawable.sun
-            "Sunset" -> R.drawable.sun
+            "Sunrise" -> R.drawable.sunrise
+            "Sunset" -> R.drawable.sunset
             else -> R.drawable.sun
         }
         return weatherCondition
