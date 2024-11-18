@@ -24,7 +24,9 @@ object WeatherManager {
     data class AdditionalDataInstance(
         var wind_speed: Double = 0.0,
         var sunrise: String = "99:99",
-        var sunset: String = "99:99"
+        var sunset: String = "99:99",
+        var uv_index: Double = 0.0,
+        var rain_sum: Double = 0.0
     )
 
     private lateinit var requestQueue: RequestQueue
@@ -98,7 +100,7 @@ object WeatherManager {
         // Request additional data for a specific region
         val baseUrl = "https://api.open-meteo.com/v1/forecast"
         val locationParams = "latitude=$latitude&longitude=$longitude"
-        val currentParams = "current=wind_speed_10m&daily=sunrise,sunset"
+        val currentParams = "current=wind_speed_10m&daily=sunrise,sunset,uv_index_max,rain_sum"
         val additionalParams = "timezone=auto&temperature_unit=fahrenheit"
 
         val url = "$baseUrl?$locationParams&$currentParams&$additionalParams"
@@ -127,8 +129,12 @@ object WeatherManager {
         val sunrise = extractTime(sunriseArray.getString(0))
         val sunsetArray = daily.getJSONArray("sunset")
         val sunset = extractTime(sunsetArray.getString(0))
+        val uvIndexArray = daily.getJSONArray("uv_index_max")
+        val uvIndex = uvIndexArray.getDouble(0)
+        val rainSumArray = daily.getJSONArray("rain_sum")
+        val rainSum = rainSumArray.getDouble(0)
 
-        return AdditionalDataInstance(windSpeed, sunrise, sunset)
+        return AdditionalDataInstance(windSpeed, sunrise, sunset, uvIndex, rainSum)
     }
 
     fun extractTime(datetime: String): String {
@@ -142,7 +148,6 @@ object WeatherManager {
     }
 
     fun isDaytime(sunrise: Int, sunset: Int, currentHour: Int): Boolean {
-        Log.d("DEBUG", "Sunrise: $sunrise, current: $currentHour, sunset: $sunset")
         return currentHour in (sunrise + 1) until sunset
     }
 }
