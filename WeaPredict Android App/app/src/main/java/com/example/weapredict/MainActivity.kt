@@ -32,6 +32,8 @@ import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import android.location.Location
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,8 +62,6 @@ class MainActivity : ComponentActivity() {
         addAll(List(7) { WeatherManager.WeatherInstance() })
     }
 
-
-
     private var locationServicesEnabled = true
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -85,6 +85,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun createUI() {
+        val syncopateFont = FontManager.getSyncopate()
+        val lexendDecaFont = FontManager.getLexendDeca()
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
@@ -116,11 +118,15 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Text(
                                     text = locationStringState,
+                                    fontFamily = lexendDecaFont,
                                     style = MaterialTheme.typography.titleSmall,
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
                                 Text(
                                     text = "${currentWeatherData.weather_type}, ${currentWeatherData.temperature_high} °F",
+                                    fontFamily = syncopateFont,
+                                    fontWeight = FontWeight.Bold,
+                                    fontStyle = FontStyle.Italic,
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -142,6 +148,7 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     Text(
                                         text = "Daily Forecast",
+                                        fontFamily = lexendDecaFont,
                                         style = MaterialTheme.typography.titleSmall,
                                         modifier = Modifier.padding(bottom = 8.dp)
                                     )
@@ -163,6 +170,7 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     Text(
                                         text = "Hourly Forecast",
+                                        fontFamily = lexendDecaFont,
                                         style = MaterialTheme.typography.titleSmall,
                                         modifier = Modifier.padding(bottom = 8.dp)
                                     )
@@ -176,18 +184,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
-
-                        // Location Display
-                        Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = locationStringState,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                        }
 
                         // Refresh Button
                         UserInterfaceManager.FindLocationButton(

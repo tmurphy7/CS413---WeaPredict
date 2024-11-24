@@ -23,6 +23,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import java.util.Calendar
@@ -33,6 +35,7 @@ object UserInterfaceManager {
     @Composable
     fun DisplayDays(dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>){
         //Display the weather for 7 day forecast
+        val lexendDecaFont = FontManager.getLexendDeca()
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -45,6 +48,7 @@ object UserInterfaceManager {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = day.day,
+                        fontFamily = lexendDecaFont,
                         modifier = Modifier.padding(8.dp)
                     )
                     Box(modifier = Modifier.height(50.dp)) {
@@ -57,6 +61,8 @@ object UserInterfaceManager {
                     }
                     Text(
                         text = "H: " + day.temperature_high.toString() + "\u00B0\n L: " + day.temperature_low + "\u00B0",
+                        fontFamily = lexendDecaFont,
+                        fontWeight = FontWeight.Light,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -69,6 +75,8 @@ object UserInterfaceManager {
                      additionalWeatherData : WeatherManager.AdditionalDataInstance,
                      hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
     ) {
+        val lexendDecaFont = FontManager.getLexendDeca()
+
         // Get information needed for sunrise/sunset
         val sunriseTime = additionalWeatherData.sunrise // Formatted as string, XX:XX
         val sunriseHour =
@@ -104,6 +112,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunriseTime),
+                            fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
                         Box(modifier = Modifier.height(50.dp)) {
@@ -116,6 +125,8 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = "Sunrise",
+                            fontFamily = lexendDecaFont,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
                         )
                     }
@@ -127,6 +138,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunsetTime),
+                            fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
                         Box(modifier = Modifier.height(50.dp)) {
@@ -139,6 +151,8 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = "Sunset",
+                            fontFamily = lexendDecaFont,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
                         )
                     }
@@ -152,6 +166,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = hour.hour,
+                            fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
                         Box(modifier = Modifier.height(50.dp)) {
@@ -164,6 +179,8 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = hour.temperature_high.toString() + "\u00B0",
+                            fontFamily = lexendDecaFont,
+                            fontWeight = FontWeight.Light,
                             modifier = Modifier.padding(8.dp)
                         )
                     }
