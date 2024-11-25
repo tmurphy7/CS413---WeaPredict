@@ -7,7 +7,7 @@ import java.nio.file.Path
 
 class Settings(context: Context) {
     var number_of_widgets = 0
-    var list_of_widgets = listOf("")
+    var list_of_widgets = mutableListOf("")
 
     val file = File(context.filesDir, "settings.json")
 
@@ -17,7 +17,7 @@ class Settings(context: Context) {
         }
         else{
             number_of_widgets = 0
-            list_of_widgets = listOf("")
+            list_of_widgets = mutableListOf("")
             saveSettings()
         }
     }

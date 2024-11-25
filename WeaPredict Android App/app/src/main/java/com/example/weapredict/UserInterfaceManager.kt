@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,9 +17,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import java.util.Calendar
 import java.util.stream.IntStream.range
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 object UserInterfaceManager {
 
@@ -305,6 +312,9 @@ object UserInterfaceManager {
     @Composable
     fun CustomWeatherSquares(settings: Settings){
         //Display the weather for 7 day forecast
+        var expanded by remember { mutableStateOf(false) }
+        var selectedItem by remember { mutableStateOf("") }
+
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -333,7 +343,7 @@ object UserInterfaceManager {
                     }
             }
             Card(
-                modifier = Modifier
+                modifier = Modifier.clickable { expanded = true }
                     .size(width = 210.dp, height = 190.dp)
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -341,12 +351,52 @@ object UserInterfaceManager {
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-            ){
+            ) {
                 Text(
-                    text = "ADD BUTTON PLACEHOLDER",
+                    text = "ADD",
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
+                DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false})
+                {
+                    DropdownMenuItem(
+                        text = {Text("Humidity")},
+                        onClick = {
+                            expanded = false
+                            selectedItem = "Humidity"
+                            if(selectedItem !in settings.list_of_widgets){
+                                settings.list_of_widgets.add(selectedItem)
+                                settings.number_of_widgets++
+                                settings.saveSettings()
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {Text("Rain Fall")},
+                        onClick = {
+                            expanded = false
+                            selectedItem = "Rain Fall"
+                            if(selectedItem !in settings.list_of_widgets){
+                                settings.list_of_widgets.add(selectedItem)
+                                settings.number_of_widgets++
+                                settings.saveSettings()
+                            }
+
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {Text("Snow Fall")},
+                        onClick = {
+                            expanded = false
+                            selectedItem = "Snow Fall"
+                            if(selectedItem !in settings.list_of_widgets){
+                                settings.list_of_widgets.add(selectedItem)
+                                settings.number_of_widgets++
+                                settings.saveSettings()
+                            }
+                        }
+                    )
+                }
             }
 
         }
