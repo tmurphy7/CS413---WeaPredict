@@ -1,5 +1,6 @@
 package com.example.weapredict
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -30,4 +31,9 @@ object FontManager {
     {
         return syncopateFamily
     }
+
+    public val backgroundColor = Color(0xFFFFFFFF) // White
+    public val foregroundColor = Color(0xFF00AAEB) // Light Blue
+    public val majorTextColor = Color(0xFF000000) // Black
+    public val minorTextColor = Color(0xFFFFFFFF) // White
 }

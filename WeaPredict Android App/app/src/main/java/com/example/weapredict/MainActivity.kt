@@ -32,6 +32,7 @@ import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import android.location.Location
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.lifecycleScope
@@ -87,12 +88,18 @@ class MainActivity : ComponentActivity() {
     private fun createUI() {
         val syncopateFont = FontManager.getSyncopate()
         val lexendDecaFont = FontManager.getLexendDeca()
+
+        val backgroundColor = FontManager.backgroundColor
+        val foregroundColor = FontManager.foregroundColor
+        val majorTextColor = FontManager.majorTextColor
+        val minorTextColor = FontManager.minorTextColor
+
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = backgroundColor
                 ) { innerPadding ->
                     Column(
                         modifier = Modifier
@@ -107,10 +114,10 @@ class MainActivity : ComponentActivity() {
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                containerColor = Color.Transparent,
                             ),
                             elevation = CardDefaults.cardElevation(
-                                defaultElevation = 4.dp
+                                defaultElevation = 0.dp // Remove shadow
                             )
                         ) {
                             Column(
@@ -119,6 +126,7 @@ class MainActivity : ComponentActivity() {
                                 Text(
                                     text = locationStringState,
                                     fontFamily = lexendDecaFont,
+                                    color = majorTextColor,
                                     style = MaterialTheme.typography.titleSmall,
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
@@ -140,17 +148,18 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .padding(bottom = 16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                    containerColor = foregroundColor
                                 )
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(16.dp)
+                                    modifier = Modifier.padding(1.dp)
                                 ) {
                                     Text(
                                         text = "Daily Forecast",
+                                        color = minorTextColor,
                                         fontFamily = lexendDecaFont,
                                         style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.padding(bottom = 8.dp)
+                                        modifier = Modifier.padding(16.dp, top = 16.dp)
                                     )
                                     UserInterfaceManager.DisplayDays(dailyWeatherDataList)
                                 }
@@ -162,17 +171,18 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .padding(bottom = 16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                    containerColor = foregroundColor
                                 )
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(16.dp)
+                                    modifier = Modifier.padding(1.dp)
                                 ) {
                                     Text(
                                         text = "Hourly Forecast",
+                                        color = minorTextColor,
                                         fontFamily = lexendDecaFont,
                                         style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.padding(bottom = 8.dp)
+                                        modifier = Modifier.padding(16.dp, top = 16.dp)
                                     )
                                     UserInterfaceManager.DisplayHours(
                                         currentWeatherData,
@@ -180,8 +190,8 @@ class MainActivity : ComponentActivity() {
                                         hourlyWeatherDataList)
                                 }
                             }
-                            UserInterfaceManager.CustomWeatherSquares(user_settings)
                         }
+                        UserInterfaceManager.CustomWeatherSquares(user_settings)
 
                         Spacer(modifier = Modifier.weight(1f))
 

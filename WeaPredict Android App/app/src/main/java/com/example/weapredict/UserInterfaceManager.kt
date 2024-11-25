@@ -55,6 +55,7 @@ object UserInterfaceManager {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = day.day,
+                        color = FontManager.minorTextColor,
                         fontFamily = lexendDecaFont,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -68,6 +69,7 @@ object UserInterfaceManager {
                     }
                     Text(
                         text = "H: " + day.temperature_high.toString() + "\u00B0\n L: " + day.temperature_low + "\u00B0",
+                        color = FontManager.minorTextColor,
                         fontFamily = lexendDecaFont,
                         fontWeight = FontWeight.Light,
                         modifier = Modifier.padding(8.dp)
@@ -119,6 +121,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunriseTime),
+                            color = FontManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -132,6 +135,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = "Sunrise",
+                            color = FontManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
@@ -145,6 +149,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunsetTime),
+                            color = FontManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -158,6 +163,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = "Sunset",
+                            color = FontManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
@@ -173,6 +179,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = hour.hour,
+                            color = FontManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -186,6 +193,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = hour.temperature_high.toString() + "\u00B0",
+                            color = FontManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Light,
                             modifier = Modifier.padding(8.dp)
@@ -332,11 +340,13 @@ object UserInterfaceManager {
                             .padding(bottom = 16.dp)
                             .padding(horizontal = 5.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = FontManager.foregroundColor
                         )
                     ){
                         Text(
                             text = square_list[squares],
+                            color = FontManager.minorTextColor,
+                            fontFamily = FontManager.getLexendDeca(),
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
@@ -349,11 +359,13 @@ object UserInterfaceManager {
                     .padding(bottom = 16.dp)
                     .padding(horizontal = 5.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = FontManager.foregroundColor
                 )
             ) {
                 Text(
                     text = "ADD",
+                    color = FontManager.minorTextColor,
+                    fontFamily = FontManager.getLexendDeca(),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
