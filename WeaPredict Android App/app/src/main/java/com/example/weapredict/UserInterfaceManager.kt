@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,8 +38,10 @@ import androidx.core.content.ContextCompat
 import java.util.Calendar
 import java.util.stream.IntStream.range
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.input.pointer.pointerInput
 
 object UserInterfaceManager {
 
@@ -319,6 +323,13 @@ object UserInterfaceManager {
 
         val squareListState = remember { mutableStateOf(settings.list_of_widgets.toList()) }
 
+        val deleteModeState = remember { mutableStateMapOf<String, Boolean>() }
+
+        squareListState.value.forEach { item ->
+            if (!deleteModeState.containsKey(item)) {
+                deleteModeState[item] = false
+            }
+        }
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -330,7 +341,16 @@ object UserInterfaceManager {
 
 
             for(square_title in squareListState.value){
-                   Card(
+                Box(
+                    modifier = Modifier.pointerInput(Unit) {
+                        detectTapGestures(
+                            onLongPress = {
+                                deleteModeState[square_title] = true // Show delete button
+                            }
+                        )
+                    }
+                ){
+                    Card(
                         modifier = Modifier
                             .size(width = 210.dp, height = 190.dp)
                             .fillMaxWidth()
@@ -340,13 +360,40 @@ object UserInterfaceManager {
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     ){
-                        Text(
-                            text = square_title,
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                        ){
+                            Text(
+                                text = square_title,
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                            if (deleteModeState[square_title] == true) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.delete), // Replace with your "remove" icon resource
+                                    contentDescription = "Remove $square_title",
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(8.dp)
+                                        .size(50.dp)
+                                        .clickable {
+                                            // Remove the widget and update state
+                                            settings.list_of_widgets.remove(square_title)
+                                            settings.number_of_widgets--
+                                            settings.saveSettings()
+                                            deleteModeState[square_title] = false
+                                            squareListState.value =
+                                                settings.list_of_widgets.toList()
+                                        },
+                                    tint = MaterialTheme.colorScheme.error // Use error color for "remove"
+                                )
+                            }
+                        }
+
                     }
+                }
             }
+            // Add button
             Card(
                 modifier = Modifier.clickable { expanded = true }
                     .size(width = 210.dp, height = 190.dp)
