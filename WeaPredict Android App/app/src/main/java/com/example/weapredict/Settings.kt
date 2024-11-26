@@ -17,7 +17,7 @@ class Settings(context: Context) {
         }
         else{
             number_of_widgets = 0
-            list_of_widgets = mutableListOf()
+            list_of_widgets = mutableListOf("Humidity")
             saveSettings()
         }
     }
