@@ -318,6 +318,8 @@ object UserInterfaceManager {
         var expanded by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf("") }
 
+        val squareListState = remember { mutableStateOf(settings.list_of_widgets.toList()) }
+
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -327,7 +329,8 @@ object UserInterfaceManager {
             val num_squares = settings.number_of_widgets
             val square_list = settings.list_of_widgets
 
-            for(squares in range(0,num_squares)){
+
+            for(square_title in squareListState.value){
                    Card(
                         modifier = Modifier
                             .size(width = 210.dp, height = 190.dp)
@@ -339,9 +342,13 @@ object UserInterfaceManager {
                         )
                     ){
                         Text(
+<<<<<<< HEAD
+                            text = square_title,
+=======
                             text = square_list[squares],
                             color = FontAndColorManager.minorTextColor,
                             fontFamily = FontAndColorManager.getLexendDeca(),
+>>>>>>> e475bb2c8ebf258647bcedd5a49af10c81ea98c4
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
@@ -375,6 +382,7 @@ object UserInterfaceManager {
                                 settings.list_of_widgets.add(selectedItem)
                                 settings.number_of_widgets++
                                 settings.saveSettings()
+                                squareListState.value = settings.list_of_widgets.toList()
                             }
                         }
                     )
@@ -387,6 +395,7 @@ object UserInterfaceManager {
                                 settings.list_of_widgets.add(selectedItem)
                                 settings.number_of_widgets++
                                 settings.saveSettings()
+                                squareListState.value = settings.list_of_widgets.toList()
                             }
 
                         }
@@ -400,6 +409,33 @@ object UserInterfaceManager {
                                 settings.list_of_widgets.add(selectedItem)
                                 settings.number_of_widgets++
                                 settings.saveSettings()
+                                squareListState.value = settings.list_of_widgets.toList()
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {Text("Wind Speed")},
+                        onClick = {
+                            expanded = false
+                            selectedItem = "Wind Speed"
+                            if(selectedItem !in settings.list_of_widgets){
+                                settings.list_of_widgets.add(selectedItem)
+                                settings.number_of_widgets++
+                                settings.saveSettings()
+                                squareListState.value = settings.list_of_widgets.toList()
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {Text("UV Index")},
+                        onClick = {
+                            expanded = false
+                            selectedItem = "UV Index"
+                            if(selectedItem !in settings.list_of_widgets){
+                                settings.list_of_widgets.add(selectedItem)
+                                settings.number_of_widgets++
+                                settings.saveSettings()
+                                squareListState.value = settings.list_of_widgets.toList()
                             }
                         }
                     )
