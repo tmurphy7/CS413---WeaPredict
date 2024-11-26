@@ -1,10 +1,8 @@
 package com.example.weapredict
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,21 +28,9 @@ import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import android.location.Location
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
-import java.io.OutputStreamWriter
-import org.tensorflow.lite.Interpreter
-import java.util.Calendar
-import java.util.Date
-import java.util.prefs.Preferences
 
 
 class MainActivity : ComponentActivity() {
@@ -78,21 +63,26 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Create a blank UI while data loads
+        enableEdgeToEdge()
+        setContent { }
+
         WeatherManager.initialize(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         user_settings = Settings(this)
-        createUI()
         checkPermissionAndFetchLocation()
     }
 
-    private fun createUI() {
-        val syncopateFont = FontManager.getSyncopate()
-        val lexendDecaFont = FontManager.getLexendDeca()
+    private fun refreshUI() {
+        val syncopateFont = FontAndColorManager.getSyncopate()
+        val lexendDecaFont = FontAndColorManager.getLexendDeca()
 
-        val backgroundColor = FontManager.backgroundColor
-        val foregroundColor = FontManager.foregroundColor
-        val majorTextColor = FontManager.majorTextColor
-        val minorTextColor = FontManager.minorTextColor
+        FontAndColorManager.refreshColorPalette(currentWeatherData, additionalWeatherData)
+        val backgroundColor = FontAndColorManager.backgroundColor
+        val foregroundColor = FontAndColorManager.foregroundColor
+        val majorTextColor = FontAndColorManager.majorTextColor
+        val minorTextColor = FontAndColorManager.minorTextColor
 
         enableEdgeToEdge()
         setContent {
@@ -135,6 +125,7 @@ class MainActivity : ComponentActivity() {
                                     fontFamily = syncopateFont,
                                     fontWeight = FontWeight.Bold,
                                     fontStyle = FontStyle.Italic,
+                                    color = majorTextColor,
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -196,8 +187,8 @@ class MainActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.weight(1f))
 
                         // Refresh Button
-                        UserInterfaceManager.FindLocationButton(
-                            onClick = { checkPermissionAndFetchLocation() }
+                        UserInterfaceManager.RefreshButton(
+                            onClick = { refreshUI() }
                         )
                     }
                 }
@@ -237,11 +228,13 @@ class MainActivity : ComponentActivity() {
                         // Update the state variable directly
                         currentWeatherData = weatherData
                         ModelManager.refreshWeatherPredictions(this, currentWeatherData, dailyWeatherDataList, hourlyWeatherDataList)
+                        refreshUI()
                     }
 
                     WeatherManager.requestAdditionalData("$latitude", "$longitude") { additionalData ->
                         // Update the state variable directly
                         additionalWeatherData = additionalData
+                        refreshUI()
                     }
                 },
                 onFailure = { error ->
