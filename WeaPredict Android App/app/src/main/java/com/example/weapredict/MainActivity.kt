@@ -1,10 +1,8 @@
 package com.example.weapredict
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,20 +28,9 @@ import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import android.location.Location
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
-import java.io.OutputStreamWriter
-import org.tensorflow.lite.Interpreter
-import java.util.Calendar
-import java.util.Date
-import java.util.prefs.Preferences
 
 
 class MainActivity : ComponentActivity() {
@@ -77,22 +63,33 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Create a blank UI while data loads
+        enableEdgeToEdge()
+        setContent { }
+
         WeatherManager.initialize(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         user_settings = Settings(this)
-        createUI()
         checkPermissionAndFetchLocation()
     }
 
-    private fun createUI() {
-        val syncopateFont = FontManager.getSyncopate()
-        val lexendDecaFont = FontManager.getLexendDeca()
+    private fun refreshUI() {
+        val syncopateFont = FontAndColorManager.getSyncopate()
+        val lexendDecaFont = FontAndColorManager.getLexendDeca()
+
+        FontAndColorManager.refreshColorPalette(currentWeatherData, additionalWeatherData)
+        val backgroundColor = FontAndColorManager.backgroundColor
+        val foregroundColor = FontAndColorManager.foregroundColor
+        val majorTextColor = FontAndColorManager.majorTextColor
+        val minorTextColor = FontAndColorManager.minorTextColor
+
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = backgroundColor
                 ) { innerPadding ->
                     Column(
                         modifier = Modifier
@@ -107,10 +104,10 @@ class MainActivity : ComponentActivity() {
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                containerColor = Color.Transparent,
                             ),
                             elevation = CardDefaults.cardElevation(
-                                defaultElevation = 4.dp
+                                defaultElevation = 0.dp // Remove shadow
                             )
                         ) {
                             Column(
@@ -119,6 +116,7 @@ class MainActivity : ComponentActivity() {
                                 Text(
                                     text = locationStringState,
                                     fontFamily = lexendDecaFont,
+                                    color = majorTextColor,
                                     style = MaterialTheme.typography.titleSmall,
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
@@ -127,6 +125,7 @@ class MainActivity : ComponentActivity() {
                                     fontFamily = syncopateFont,
                                     fontWeight = FontWeight.Bold,
                                     fontStyle = FontStyle.Italic,
+                                    color = majorTextColor,
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -140,17 +139,18 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .padding(bottom = 16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                    containerColor = foregroundColor
                                 )
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(16.dp)
+                                    modifier = Modifier.padding(1.dp)
                                 ) {
                                     Text(
                                         text = "Daily Forecast",
+                                        color = minorTextColor,
                                         fontFamily = lexendDecaFont,
                                         style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.padding(bottom = 8.dp)
+                                        modifier = Modifier.padding(16.dp, top = 16.dp)
                                     )
                                     UserInterfaceManager.DisplayDays(dailyWeatherDataList)
                                 }
@@ -162,17 +162,18 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .padding(bottom = 16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                    containerColor = foregroundColor
                                 )
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(16.dp)
+                                    modifier = Modifier.padding(1.dp)
                                 ) {
                                     Text(
                                         text = "Hourly Forecast",
+                                        color = minorTextColor,
                                         fontFamily = lexendDecaFont,
                                         style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.padding(bottom = 8.dp)
+                                        modifier = Modifier.padding(16.dp, top = 16.dp)
                                     )
                                     UserInterfaceManager.DisplayHours(
                                         currentWeatherData,
@@ -180,14 +181,14 @@ class MainActivity : ComponentActivity() {
                                         hourlyWeatherDataList)
                                 }
                             }
-                            UserInterfaceManager.CustomWeatherSquares(user_settings)
                         }
+                        UserInterfaceManager.CustomWeatherSquares(user_settings)
 
                         Spacer(modifier = Modifier.weight(1f))
 
                         // Refresh Button
-                        UserInterfaceManager.FindLocationButton(
-                            onClick = { checkPermissionAndFetchLocation() }
+                        UserInterfaceManager.RefreshButton(
+                            onClick = { refreshUI() }
                         )
                     }
                 }
@@ -227,11 +228,13 @@ class MainActivity : ComponentActivity() {
                         // Update the state variable directly
                         currentWeatherData = weatherData
                         ModelManager.refreshWeatherPredictions(this, currentWeatherData, dailyWeatherDataList, hourlyWeatherDataList)
+                        refreshUI()
                     }
 
                     WeatherManager.requestAdditionalData("$latitude", "$longitude") { additionalData ->
                         // Update the state variable directly
                         additionalWeatherData = additionalData
+                        refreshUI()
                     }
                 },
                 onFailure = { error ->

@@ -1,8 +1,5 @@
 package com.example.weapredict
 
-import android.content.Context
-import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -28,10 +25,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import java.util.Calendar
 import java.util.stream.IntStream.range
 import androidx.compose.runtime.getValue
@@ -42,7 +37,7 @@ object UserInterfaceManager {
     @Composable
     fun DisplayDays(dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>){
         //Display the weather for 7 day forecast
-        val lexendDecaFont = FontManager.getLexendDeca()
+        val lexendDecaFont = FontAndColorManager.getLexendDeca()
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -55,6 +50,7 @@ object UserInterfaceManager {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = day.day,
+                        color = FontAndColorManager.minorTextColor,
                         fontFamily = lexendDecaFont,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -68,6 +64,7 @@ object UserInterfaceManager {
                     }
                     Text(
                         text = "H: " + day.temperature_high.toString() + "\u00B0\n L: " + day.temperature_low + "\u00B0",
+                        color = FontAndColorManager.minorTextColor,
                         fontFamily = lexendDecaFont,
                         fontWeight = FontWeight.Light,
                         modifier = Modifier.padding(8.dp)
@@ -82,7 +79,7 @@ object UserInterfaceManager {
                      additionalWeatherData : WeatherManager.AdditionalDataInstance,
                      hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
     ) {
-        val lexendDecaFont = FontManager.getLexendDeca()
+        val lexendDecaFont = FontAndColorManager.getLexendDeca()
 
         // Get information needed for sunrise/sunset
         val sunriseTime = additionalWeatherData.sunrise // Formatted as string, XX:XX
@@ -119,6 +116,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunriseTime),
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -132,6 +130,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = "Sunrise",
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
@@ -145,6 +144,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunsetTime),
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -158,6 +158,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = "Sunset",
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
@@ -173,6 +174,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = hour.hour,
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -186,6 +188,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = hour.temperature_high.toString() + "\u00B0",
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Light,
                             modifier = Modifier.padding(8.dp)
@@ -303,7 +306,7 @@ object UserInterfaceManager {
     }
 
     @Composable
-    fun FindLocationButton(onClick: () -> Unit) {
+    fun RefreshButton(onClick: () -> Unit) {
         Button(onClick = { onClick() }) {
             Text("Refresh Data")
         }
@@ -335,11 +338,17 @@ object UserInterfaceManager {
                             .padding(bottom = 16.dp)
                             .padding(horizontal = 5.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = FontAndColorManager.foregroundColor
                         )
                     ){
                         Text(
+<<<<<<< HEAD
                             text = square_title,
+=======
+                            text = square_list[squares],
+                            color = FontAndColorManager.minorTextColor,
+                            fontFamily = FontAndColorManager.getLexendDeca(),
+>>>>>>> e475bb2c8ebf258647bcedd5a49af10c81ea98c4
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
@@ -352,11 +361,13 @@ object UserInterfaceManager {
                     .padding(bottom = 16.dp)
                     .padding(horizontal = 5.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = FontAndColorManager.foregroundColor
                 )
             ) {
                 Text(
                     text = "ADD",
+                    color = FontAndColorManager.minorTextColor,
+                    fontFamily = FontAndColorManager.getLexendDeca(),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
