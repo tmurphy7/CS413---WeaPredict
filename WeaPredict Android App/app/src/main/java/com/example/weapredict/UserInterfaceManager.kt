@@ -9,6 +9,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,6 +37,7 @@ import java.util.Calendar
 import java.util.stream.IntStream.range
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 
 object UserInterfaceManager {
 
@@ -355,11 +357,17 @@ object UserInterfaceManager {
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             ) {
-                Text(
-                    text = "ADD",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Image(
+                        modifier = Modifier.size(100.dp),
+                        contentDescription = "Plus Sign",
+                        contentScale = ContentScale.Crop,
+                        painter = painterResource(R.drawable.plussign)
+                    )
+                }
                 DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false})
                 {
                     DropdownMenuItem(
