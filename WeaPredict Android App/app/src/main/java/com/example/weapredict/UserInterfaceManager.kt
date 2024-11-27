@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +42,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 
 object UserInterfaceManager {
@@ -316,10 +319,11 @@ object UserInterfaceManager {
     }
 
     @Composable
-    fun CustomWeatherSquares(settings: Settings){
+    fun CustomWeatherSquares(settings: Settings, weatherData: WeatherManager.AdditionalDataInstance) {
         //Display the weather for 7 day forecast
         var expanded by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf("") }
+
 
         val squareListState = remember { mutableStateOf(settings.list_of_widgets.toList()) }
 
@@ -330,17 +334,37 @@ object UserInterfaceManager {
                 deleteModeState[item] = false
             }
         }
-        Row(modifier = Modifier
-            .horizontalScroll(rememberScrollState())
-            .fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .fillMaxWidth()
+        ) {
 
             //able to have more  to display
             settings.loadSettings()
-            val num_squares = settings.number_of_widgets
-            val square_list = settings.list_of_widgets
 
+            for (square_title in squareListState.value) {
+                //set unit symbol to display
+                val unit_symbol = when (square_title) {
+                    //Need to verify these are correct units
+                    "Humidity" -> "%"
+                    "Rain Fall" -> "mm"
+                    "Snow Fall" -> "cm"
+                    "Wind Speed" -> "km/h"
+                    "UV Index" -> ""
+                    else -> "" // Default case
+                }
 
-            for(square_title in squareListState.value){
+                val weather_value = when (square_title) {
+                    //Need to verify these are correct units
+                    "Humidity" -> "" // weatherData.humidity
+                    "Rain Fall" -> weatherData.rain_sum
+                    "Snow Fall" -> "" // weatherData.snow_fall
+                    "Wind Speed" -> weatherData.wind_speed
+                    "UV Index" -> weatherData.uv_index
+                    else -> "" // Default case
+                }
+
                 Box(
                     modifier = Modifier.pointerInput(Unit) {
                         detectTapGestures(
@@ -349,7 +373,7 @@ object UserInterfaceManager {
                             }
                         )
                     }
-                ){
+                ) {
                     Card(
                         modifier = Modifier
                             .size(width = 210.dp, height = 190.dp)
@@ -359,12 +383,13 @@ object UserInterfaceManager {
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         )
-                    ){
+                    ) {
                         Box(
                             modifier = Modifier.fillMaxSize()
-                        ){
+                        ) {
+
                             Text(
-                                text = square_title,
+                                text = square_title + ": " + weather_value + unit_symbol, //I THINK THIS WORKS?,
                                 style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.align(Alignment.Center)
                             )
@@ -384,8 +409,7 @@ object UserInterfaceManager {
                                             deleteModeState[square_title] = false
                                             squareListState.value =
                                                 settings.list_of_widgets.toList()
-                                        },
-                                    tint = MaterialTheme.colorScheme.error // Use error color for "remove"
+                                        }
                                 )
                             }
                         }
@@ -415,77 +439,28 @@ object UserInterfaceManager {
                         painter = painterResource(R.drawable.plussign)
                     )
                 }
-                DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false})
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false })
                 {
-                    DropdownMenuItem(
-                        text = {Text("Humidity")},
-                        onClick = {
-                            expanded = false
-                            selectedItem = "Humidity"
-                            if(selectedItem !in settings.list_of_widgets){
-                                settings.list_of_widgets.add(selectedItem)
-                                settings.number_of_widgets++
-                                settings.saveSettings()
-                                squareListState.value = settings.list_of_widgets.toList()
+                    val weather_data_list =
+                        listOf("Humidity", "Rain Fall", "Snow Fall", "Wind Speed", "UV Index")
+                    for (weather_data_type in weather_data_list) {
+                        DropdownMenuItem(
+                            text = { Text(weather_data_type) },
+                            onClick = {
+                                expanded = false
+                                selectedItem = weather_data_type
+                                if (selectedItem !in settings.list_of_widgets) {
+                                    settings.list_of_widgets.add(selectedItem)
+                                    settings.number_of_widgets++
+                                    settings.saveSettings()
+                                    squareListState.value = settings.list_of_widgets.toList()
+                                }
                             }
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {Text("Rain Fall")},
-                        onClick = {
-                            expanded = false
-                            selectedItem = "Rain Fall"
-                            if(selectedItem !in settings.list_of_widgets){
-                                settings.list_of_widgets.add(selectedItem)
-                                settings.number_of_widgets++
-                                settings.saveSettings()
-                                squareListState.value = settings.list_of_widgets.toList()
-                            }
-
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {Text("Snow Fall")},
-                        onClick = {
-                            expanded = false
-                            selectedItem = "Snow Fall"
-                            if(selectedItem !in settings.list_of_widgets){
-                                settings.list_of_widgets.add(selectedItem)
-                                settings.number_of_widgets++
-                                settings.saveSettings()
-                                squareListState.value = settings.list_of_widgets.toList()
-                            }
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {Text("Wind Speed")},
-                        onClick = {
-                            expanded = false
-                            selectedItem = "Wind Speed"
-                            if(selectedItem !in settings.list_of_widgets){
-                                settings.list_of_widgets.add(selectedItem)
-                                settings.number_of_widgets++
-                                settings.saveSettings()
-                                squareListState.value = settings.list_of_widgets.toList()
-                            }
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {Text("UV Index")},
-                        onClick = {
-                            expanded = false
-                            selectedItem = "UV Index"
-                            if(selectedItem !in settings.list_of_widgets){
-                                settings.list_of_widgets.add(selectedItem)
-                                settings.number_of_widgets++
-                                settings.saveSettings()
-                                squareListState.value = settings.list_of_widgets.toList()
-                            }
-                        }
-                    )
+                        )
+                    }
                 }
-            }
 
+            }
         }
     }
 

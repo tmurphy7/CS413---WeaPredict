@@ -180,7 +180,7 @@ class MainActivity : ComponentActivity() {
                                         hourlyWeatherDataList)
                                 }
                             }
-                            UserInterfaceManager.CustomWeatherSquares(user_settings)
+                            UserInterfaceManager.CustomWeatherSquares(user_settings, additionalWeatherData)
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
