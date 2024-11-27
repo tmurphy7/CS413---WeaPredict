@@ -316,10 +316,11 @@ object UserInterfaceManager {
     }
 
     @Composable
-    fun CustomWeatherSquares(settings: Settings){
+    fun CustomWeatherSquares(settings: Settings, weatherData: WeatherManager.AdditionalDataInstance){
         //Display the weather for 7 day forecast
         var expanded by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf("") }
+
 
         val squareListState = remember { mutableStateOf(settings.list_of_widgets.toList()) }
 
@@ -336,11 +337,29 @@ object UserInterfaceManager {
 
             //able to have more  to display
             settings.loadSettings()
-            val num_squares = settings.number_of_widgets
-            val square_list = settings.list_of_widgets
-
 
             for(square_title in squareListState.value){
+                //set unit symbol to display
+                val unit_symbol = when (square_title) {
+                    //Need to verify these are correct units
+                    "Humidity" -> "%"
+                    "Rain Fall" -> "mm"
+                    "Snow Fall" -> "cm"
+                    "Wind Speed" -> "km/h"
+                    "UV Index" -> ""
+                    else -> "" // Default case
+                }
+
+                val weather_value = when (square_title) {
+                    //Need to verify these are correct units
+                    "Humidity" -> "" // weatherData.humidity
+                    "Rain Fall" -> weatherData.rain_sum
+                    "Snow Fall" -> "" // weatherData.snow_fall
+                    "Wind Speed" -> weatherData.wind_speed
+                    "UV Index" -> weatherData.uv_index
+                    else -> "" // Default case
+                }
+
                 Box(
                     modifier = Modifier.pointerInput(Unit) {
                         detectTapGestures(
@@ -363,8 +382,9 @@ object UserInterfaceManager {
                         Box(
                             modifier = Modifier.fillMaxSize()
                         ){
+
                             Text(
-                                text = square_title,
+                                text = square_title + ": " + weather_value + unit_symbol, //I THINK THIS WORKS?,
                                 style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.align(Alignment.Center)
                             )
