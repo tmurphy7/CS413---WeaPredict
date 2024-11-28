@@ -1,8 +1,5 @@
 package com.example.weapredict
 
-import android.content.Context
-import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -13,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -32,18 +28,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import java.util.Calendar
-import java.util.stream.IntStream.range
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 
 object UserInterfaceManager {
@@ -51,7 +42,7 @@ object UserInterfaceManager {
     @Composable
     fun DisplayDays(dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>){
         //Display the weather for 7 day forecast
-        val lexendDecaFont = FontManager.getLexendDeca()
+        val lexendDecaFont = FontAndColorManager.getLexendDeca()
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -64,6 +55,7 @@ object UserInterfaceManager {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = day.day,
+                        color = FontAndColorManager.minorTextColor,
                         fontFamily = lexendDecaFont,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -77,6 +69,7 @@ object UserInterfaceManager {
                     }
                     Text(
                         text = "H: " + day.temperature_high.toString() + "\u00B0\n L: " + day.temperature_low + "\u00B0",
+                        color = FontAndColorManager.minorTextColor,
                         fontFamily = lexendDecaFont,
                         fontWeight = FontWeight.Light,
                         modifier = Modifier.padding(8.dp)
@@ -91,7 +84,7 @@ object UserInterfaceManager {
                      additionalWeatherData : WeatherManager.AdditionalDataInstance,
                      hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
     ) {
-        val lexendDecaFont = FontManager.getLexendDeca()
+        val lexendDecaFont = FontAndColorManager.getLexendDeca()
 
         // Get information needed for sunrise/sunset
         val sunriseTime = additionalWeatherData.sunrise // Formatted as string, XX:XX
@@ -128,6 +121,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunriseTime),
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -142,6 +136,7 @@ object UserInterfaceManager {
                         Text(
                             text = "Sunrise",
                             fontFamily = lexendDecaFont,
+                            color = FontAndColorManager.minorTextColor,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -154,6 +149,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = convertTo12HourFormat(sunsetTime),
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -167,6 +163,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = "Sunset",
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
@@ -182,6 +179,7 @@ object UserInterfaceManager {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = hour.hour,
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -195,6 +193,7 @@ object UserInterfaceManager {
                         }
                         Text(
                             text = hour.temperature_high.toString() + "\u00B0",
+                            color = FontAndColorManager.minorTextColor,
                             fontFamily = lexendDecaFont,
                             fontWeight = FontWeight.Light,
                             modifier = Modifier.padding(8.dp)
@@ -381,7 +380,7 @@ object UserInterfaceManager {
                             .padding(bottom = 16.dp)
                             .padding(horizontal = 5.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = FontAndColorManager.foregroundColor,
                         )
                     ) {
                         Box(
@@ -390,6 +389,7 @@ object UserInterfaceManager {
 
                             Text(
                                 text = square_title + ": " + weather_value + unit_symbol, //I THINK THIS WORKS?,
+                                color = FontAndColorManager.minorTextColor,
                                 style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.align(Alignment.Center)
                             )
@@ -425,7 +425,7 @@ object UserInterfaceManager {
                     .padding(bottom = 16.dp)
                     .padding(horizontal = 5.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = FontAndColorManager.foregroundColor
                 )
             ) {
                 Box(

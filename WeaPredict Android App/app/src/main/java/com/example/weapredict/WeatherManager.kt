@@ -26,7 +26,8 @@ object WeatherManager {
         var sunrise: String = "99:99",
         var sunset: String = "99:99",
         var uv_index: Double = 0.0,
-        var rain_sum: Double = 0.0
+        var rain_sum: Double = 0.0,
+        var isDay: Boolean = true
     )
 
     private lateinit var requestQueue: RequestQueue
