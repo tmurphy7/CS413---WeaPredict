@@ -7,11 +7,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +29,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.weapredict.ui.theme.WeaPredictTheme
@@ -31,6 +39,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import com.example.weapredict.UserInterfaceManager.getDrawableWeatherImage
 
 
 class MainActivity : ComponentActivity() {
@@ -85,6 +94,8 @@ class MainActivity : ComponentActivity() {
         val majorTextColor = FontAndColorManager.majorTextColor
         val minorTextColor = FontAndColorManager.minorTextColor
 
+        val weatherCondition = getDrawableWeatherImage(currentWeatherData.weather_type, additionalWeatherData.isDay)
+
         enableEdgeToEdge()
         setContent {
             WeaPredictTheme {
@@ -108,11 +119,11 @@ class MainActivity : ComponentActivity() {
                                 containerColor = Color.Transparent
                             ),
                             elevation = CardDefaults.cardElevation(
-                                defaultElevation = 0.dp // Remove shadow
+                                defaultElevation = 0.dp
                             )
                         ) {
                             Column(
-                                modifier = Modifier.padding(24.dp)
+                                modifier = Modifier.padding(16.dp, bottom = 0.dp)
                             ) {
                                 Text(
                                     text = locationStringState,
@@ -121,15 +132,38 @@ class MainActivity : ComponentActivity() {
                                     style = MaterialTheme.typography.titleSmall,
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
-                                Text(
-                                    text = "${currentWeatherData.weather_type}, ${currentWeatherData.temperature_high} °F",
-                                    fontFamily = syncopateFont,
-                                    fontWeight = FontWeight.Bold,
-                                    fontStyle = FontStyle.Italic,
-                                    color = majorTextColor,
-                                    style = MaterialTheme.typography.headlineSmall,
+                                // Current Weather Data
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(15.dp),
                                     modifier = Modifier.fillMaxWidth()
-                                )
+                                ) {
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            text = currentWeatherData.weather_type,
+                                            fontFamily = syncopateFont,
+                                            fontWeight = FontWeight.Bold,
+                                            color = majorTextColor,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.padding(bottom = 1.dp)
+                                        )
+                                        Text(
+                                            text = "${currentWeatherData.temperature_high} °F",
+                                            fontFamily = syncopateFont,
+                                            fontWeight = FontWeight.Bold,
+                                            color = majorTextColor,
+                                            style = MaterialTheme.typography.headlineLarge
+                                        )
+                                    }
+                                    Image(
+                                        painter = painterResource(weatherCondition),
+                                        contentDescription = "Current Weather",
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -138,7 +172,7 @@ class MainActivity : ComponentActivity() {
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 16.dp),
+                                    .padding(bottom = 10.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = foregroundColor
                                 )
@@ -161,7 +195,7 @@ class MainActivity : ComponentActivity() {
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 16.dp),
+                                    .padding(bottom = 10.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = foregroundColor
                                 )

@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 
 object UserInterfaceManager {
 
@@ -43,6 +44,7 @@ object UserInterfaceManager {
     fun DisplayDays(dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>){
         //Display the weather for 7 day forecast
         val lexendDecaFont = FontAndColorManager.getLexendDeca()
+        val syncopateFont = FontAndColorManager.getSyncopate()
         Row(modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth()) {
@@ -52,27 +54,42 @@ object UserInterfaceManager {
             for (day in weatherObjectDaysList) {
                 //set image for weather type
                 val weatherCondition = getDrawableWeatherImage(day.weather_type, true)
-                Column(modifier = Modifier.padding(8.dp)) {
+                Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = day.day,
                         color = FontAndColorManager.minorTextColor,
-                        fontFamily = lexendDecaFont,
-                        modifier = Modifier.padding(8.dp)
+                        fontFamily = syncopateFont,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
                     )
                     Box(modifier = Modifier.height(50.dp)) {
                         Image(
-                            modifier = Modifier.size(60.dp),
+                            modifier = Modifier
+                                .size(60.dp),
                             contentDescription = "Weather Image",
                             contentScale = ContentScale.Crop,
                             painter = painterResource(weatherCondition)
                         )
                     }
                     Text(
-                        text = "H: " + day.temperature_high.toString() + "\u00B0\n L: " + day.temperature_low + "\u00B0",
+                        text = day.temperature_high.toString() + "°",
+                        color = FontAndColorManager.minorTextColor,
+                        fontFamily = lexendDecaFont,
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text(
+                        text = day.temperature_low.toString() + "°",
                         color = FontAndColorManager.minorTextColor,
                         fontFamily = lexendDecaFont,
                         fontWeight = FontWeight.Light,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                            .fillMaxWidth()
                     )
                 }
             }
@@ -85,6 +102,7 @@ object UserInterfaceManager {
                      hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
     ) {
         val lexendDecaFont = FontAndColorManager.getLexendDeca()
+        val syncopateFont = FontAndColorManager.getSyncopate()
 
         // Get information needed for sunrise/sunset
         val sunriseTime = additionalWeatherData.sunrise // Formatted as string, XX:XX
@@ -118,11 +136,12 @@ object UserInterfaceManager {
                 {
                     val sunriseImage = getDrawableWeatherImage("Sunrise", true)
 
-                    Column(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = convertTo12HourFormat(sunriseTime),
                             color = FontAndColorManager.minorTextColor,
-                            fontFamily = lexendDecaFont,
+                            fontFamily = syncopateFont,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
                         )
                         Box(modifier = Modifier.height(50.dp)) {
@@ -146,11 +165,12 @@ object UserInterfaceManager {
                 } else if (hourInt == sunsetHour + 1 && sunsetNotWritten) {
                     val sunsetImage = getDrawableWeatherImage("Sunset", true)
 
-                    Column(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = convertTo12HourFormat(sunsetTime),
                             color = FontAndColorManager.minorTextColor,
-                            fontFamily = lexendDecaFont,
+                            fontFamily = syncopateFont,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
                         )
                         Box(modifier = Modifier.height(50.dp)) {
@@ -176,11 +196,12 @@ object UserInterfaceManager {
                     val weatherCondition =
                         getDrawableWeatherImage(hour.weather_type, isCurrentlyDaytime)
 
-                    Column(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = hour.hour,
                             color = FontAndColorManager.minorTextColor,
-                            fontFamily = lexendDecaFont,
+                            fontFamily = syncopateFont,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(8.dp)
                         )
                         Box(modifier = Modifier.height(50.dp)) {
@@ -356,9 +377,9 @@ object UserInterfaceManager {
 
                 val weather_value = when (square_title) {
                     //Need to verify these are correct units
-                    "Humidity" -> "" // weatherData.humidity
+                    "Humidity" -> weatherData.humidity
                     "Rain Fall" -> weatherData.rain_sum
-                    "Snow Fall" -> "" // weatherData.snow_fall
+                    "Snow Fall" -> weatherData.snowfall_sum
                     "Wind Speed" -> weatherData.wind_speed
                     "UV Index" -> weatherData.uv_index
                     else -> "" // Default case
@@ -390,6 +411,7 @@ object UserInterfaceManager {
                             Text(
                                 text = square_title + ": " + weather_value + unit_symbol, //I THINK THIS WORKS?,
                                 color = FontAndColorManager.minorTextColor,
+                                fontFamily = FontAndColorManager.getLexendDeca(),
                                 style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.align(Alignment.Center)
                             )
