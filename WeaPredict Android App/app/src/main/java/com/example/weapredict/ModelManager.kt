@@ -9,10 +9,11 @@ import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.util.Calendar
 import java.util.Date
+import java.text.SimpleDateFormat
 
 object ModelManager {
 
-    private var temperatureModelName = "Temperature.tflite"
+    private var temperatureModelName = "temp.tflite"
     private lateinit var temperatureModel: Interpreter
     private var weatherModelName = "weatherClass.tflite"
     private lateinit var weatherModel: Interpreter
@@ -23,28 +24,46 @@ object ModelManager {
         currentWeatherData: WeatherManager.WeatherInstance,
         dailyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>,
         hourlyWeatherDataList: SnapshotStateList<WeatherManager.WeatherInstance>
-    ){
-        // TODO: ALL needs to be reviewed by T and R to make sure everything's input and output correctly
-        // Utilize temperature model to get temperature forecast
+    ) {
+        // Set the start time to the next hour if needed
         val currentDateTime = Date()
-        temperatureModel = loadModelFromAssetsFolder(temperatureModelName, context)
-        val hourlyTempOutput = predictHourlyTemperature(currentDateTime, temperatureModel)
-        val dailyTempOutput = predictDailyTemperature(currentDateTime, temperatureModel)
+        val calendar = Calendar.getInstance().apply { time = currentDateTime }
+        if (calendar.get(Calendar.MINUTE) > 0) {
+            calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + 1)
+            calendar.set(Calendar.MINUTE, 0)
+        }
+        val startTime = calendar.time
 
-        // Convert FloatArray to Array<FloatArray>
+        // Load the temperature model
+        temperatureModel = loadModelFromAssetsFolder(temperatureModelName, context)
+
+        // Generate hourly and daily temperature predictions
+        val hourlyTempOutput = predictHourlyTemperature(startTime, temperatureModel)
+        val dailyTempOutput = predictDailyTemperature(startTime, temperatureModel)
+
+        // Log predictions for debugging
+        Log.d("ModelManager", "Hourly Temperature Predictions: ${hourlyTempOutput.joinToString()}")
+        Log.d("ModelManager", "Daily Temperature Predictions: ${dailyTempOutput.joinToString()}")
+
+        // Create inputs for weather classification model
         val hourlyWeatherModelInput = Array(24) { FloatArray(1) }
         val dailyWeatherModelInput = Array(7) { FloatArray(1) }
+
         for (hour in 0 until 24) { hourlyWeatherModelInput[hour][0] = hourlyTempOutput[hour] }
         for (day in 0 until 7) { dailyWeatherModelInput[day][0] = dailyTempOutput[day] }
 
-        // Utilize weather model to get weather forecast using temperature (and other inputs as needed)
-        // TODO: Add more inputs for weather model (?)
+        // Load the weather classification model
         weatherModel = loadModelFromAssetsFolder(weatherModelName, context)
+
+        // Generate weather class predictions
         val hourlyWeatherModelOutput = predictWeatherClass(hourlyWeatherModelInput, weatherModel)
         val dailyWeatherModelOutput = predictWeatherClass(dailyWeatherModelInput, weatherModel)
 
-        // Convert outputs into weather objects
-        // TODO: May need to add day / time / hour
+        // Log weather predictions for debugging
+        Log.d("ModelManager", "Hourly Weather Predictions: ${hourlyWeatherModelOutput.joinToString()}")
+        Log.d("ModelManager", "Daily Weather Predictions: ${dailyWeatherModelOutput.joinToString()}")
+
+        // Fill hourly weather data
         hourlyWeatherDataList[0] = currentWeatherData
         for (hour in 1 until 24) {
             hourlyWeatherDataList[hour] = WeatherManager.WeatherInstance(
@@ -53,6 +72,8 @@ object ModelManager {
                 temperature_low = hourlyTempOutput[hour].toDouble()
             )
         }
+
+        // Fill daily weather data
         for (day in 0 until 7) {
             dailyWeatherDataList[day] = WeatherManager.WeatherInstance(
                 weather_type = dailyWeatherModelOutput[day],
@@ -60,12 +81,9 @@ object ModelManager {
                 temperature_low = dailyTempOutput[day].toDouble()
             )
         }
-
-        // Debug code
-        // for (hour in 0 until 24) { Log.d("DEBUG", "Type: ${hourlyWeatherDataList[hour].weather_type}") }
     }
 
-    // "modelPath" should be a string like "model.tflite", context should just be 'this' when called from MainActivity
+    // Load the model from the assets folder
     fun loadModelFromAssetsFolder(modelPath: String, context: Context): Interpreter {
         try {
             val tfLiteModel = loadModelFile(modelPath, context)
@@ -77,6 +95,7 @@ object ModelManager {
         }
     }
 
+    // Load the model file into memory
     private fun loadModelFile(modelPath: String, context: Context): MappedByteBuffer {
         val fileDescriptor = context.assets.openFd(modelPath)
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
@@ -86,20 +105,20 @@ object ModelManager {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    fun predictHourlyTemperature(modelInput: Date, temperatureModel: Interpreter): FloatArray {
-        // Convert Date into an array of floats
-        val calendar = Calendar.getInstance().apply { time = modelInput }
+    // Predict hourly temperature
+    fun predictHourlyTemperature(startTime: Date, temperatureModel: Interpreter): FloatArray {
+        val calendar = Calendar.getInstance().apply { time = startTime }
 
         val predictions = FloatArray(24)
         for (hour in 0 until 24) {
-            calendar.set(Calendar.HOUR_OF_DAY, hour)
+            calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + hour)
             val timeFeatures = Array(1) { FloatArray(4) }.apply {
                 this[0][0] = calendar.get(Calendar.HOUR_OF_DAY).toFloat() / 24f
                 this[0][1] = calendar.get(Calendar.DAY_OF_MONTH).toFloat() / 31f
                 this[0][2] = (calendar.get(Calendar.MONTH) + 1).toFloat() / 12f
-                this[0][3] = calendar.get(Calendar.YEAR).toFloat() / 2024f // May need to change
+                this[0][3] = calendar.get(Calendar.YEAR).toFloat() / 2024f
             }
-            // Run model and return output
+
             val output = Array(1) { FloatArray(1) }
             temperatureModel.run(timeFeatures, output)
             predictions[hour] = output[0][0]
@@ -108,20 +127,20 @@ object ModelManager {
         return predictions
     }
 
-    fun predictDailyTemperature(modelInput: Date, temperatureModel: Interpreter): FloatArray {
-        // Convert Date into an array of floats
-        val calendar = Calendar.getInstance().apply { time = modelInput }
+    // Predict daily temperature (min/max)
+    fun predictDailyTemperature(startTime: Date, temperatureModel: Interpreter): FloatArray {
+        val calendar = Calendar.getInstance().apply { time = startTime }
 
         val predictions = FloatArray(7)
         for (day in 0 until 7) {
-            calendar.set(Calendar.DAY_OF_MONTH, day)
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + day)
             val timeFeatures = Array(1) { FloatArray(4) }.apply {
-                this[0][0] = calendar.get(Calendar.HOUR_OF_DAY).toFloat() / 24f
+                this[0][0] = 0f  // Placeholder value for hour, daily model
                 this[0][1] = calendar.get(Calendar.DAY_OF_MONTH).toFloat() / 31f
                 this[0][2] = (calendar.get(Calendar.MONTH) + 1).toFloat() / 12f
-                this[0][3] = calendar.get(Calendar.YEAR).toFloat() / 2024f // May need to change
+                this[0][3] = calendar.get(Calendar.YEAR).toFloat() / 2024f
             }
-            // Run model and return output
+
             val output = Array(1) { FloatArray(1) }
             temperatureModel.run(timeFeatures, output)
             predictions[day] = output[0][0]
@@ -130,17 +149,15 @@ object ModelManager {
         return predictions
     }
 
+    // Predict weather classification based on model inputs
     fun predictWeatherClass(modelInputs: Array<FloatArray>, weatherModel: Interpreter): Array<String> {
-        // Shapes and initializes the output data array
         val outputShape = weatherModel.getOutputTensor(0).shape()
-        val weatherModelOutput = Array(modelInputs.size) { FloatArray(outputShape[1]) } // Adjust to match input size
+        val weatherModelOutput = Array(modelInputs.size) { FloatArray(outputShape[1]) }
 
-        weatherModel.run(modelInputs, weatherModelOutput) // Run the model for the current input
+        weatherModel.run(modelInputs, weatherModelOutput)
 
-        // Prepare to collect predicted weather classifications
         val predictions = Array(modelInputs.size) { "Unknown Weather" }
 
-        // Picks the most likely weather classification for each output
         for (i in weatherModelOutput.indices) {
             var maxIndex = 0
             var maxValue = weatherModelOutput[i][0]
@@ -152,26 +169,12 @@ object ModelManager {
                 }
             }
 
-            // This mapping will need updating with every new weather model
             val mapping = mapOf(
-                0 to "Clear Sky",       // 0.0
-                1 to "Partly cloudy",   // 1.0
-                2 to "Partly cloudy",   // 2.0
-                3 to "Partly cloudy",   // 3.0
-                4 to "Foggy",           // 45.0
-                5 to "Drizzle",         // 51.0
-                6 to "Drizzle",         // 53.0
-                7 to "Drizzle",         // 55.0
-                8 to "Drizzle",         // 56.0
-                9 to "Drizzle",         // 57.0
-                10 to "Rain",           // 61.0
-                11 to "Rain",           // 63.0
-                12 to "Rain",           // 65.0
-                13 to "Rain",           // 66.0
-                14 to "Rain",           // 67.0
-                15 to "Rain showers",   // 80.0
-                16 to "Rain showers",   // 81.0
-                17 to "Thunderstorm"    // 95.0
+                0 to "Clear Sky", 1 to "Partly cloudy", 2 to "Partly cloudy",
+                3 to "Partly cloudy", 4 to "Foggy", 5 to "Drizzle", 6 to "Drizzle",
+                7 to "Drizzle", 8 to "Drizzle", 9 to "Drizzle", 10 to "Rain",
+                11 to "Rain", 12 to "Rain", 13 to "Rain", 14 to "Rain",
+                15 to "Rain showers", 16 to "Rain showers", 17 to "Thunderstorm"
             )
 
             predictions[i] = mapping[maxIndex] ?: "Unknown Weather"

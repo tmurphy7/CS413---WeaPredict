@@ -1,1 +1,1 @@
-sdk.dir=C:\Users\gbell\AppData\Local\Android\Sdk
+sdk.dir=C:\\Users\\rajya\\AppData\\Local\\Android\\Sdk
