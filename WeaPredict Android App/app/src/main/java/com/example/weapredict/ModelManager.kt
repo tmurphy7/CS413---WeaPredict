@@ -70,7 +70,7 @@ object ModelManager {
             hourlyWeatherDataList[hour] = WeatherManager.WeatherInstance(
                 weather_type = hourlyWeatherModelOutput[hour],
                 temperature_high = hourlyTempOutput[hour].toDouble(),
-                // TODO: Needs to display low temp and not just a duplicate
+                // TODO: Needs to add low temp and not just a duplicate
                 temperature_low = hourlyTempOutput[hour].toDouble()
             )
         }
