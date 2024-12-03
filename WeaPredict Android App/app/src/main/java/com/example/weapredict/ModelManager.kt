@@ -3,13 +3,19 @@ package com.example.weapredict
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import org.json.JSONObject
 import org.tensorflow.lite.Interpreter
+import java.io.BufferedReader
 import java.io.FileInputStream
+import java.io.InputStreamReader
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.util.Calendar
 import java.util.Date
-import java.text.SimpleDateFormat
+
+import java.io.InputStream
+import org.json.JSONArray
+
 
 object ModelManager {
 
@@ -55,9 +61,11 @@ object ModelManager {
         // Load the weather classification model
         weatherModel = loadModelFromAssetsFolder(weatherModelName, context)
 
+        val weatherClassScaler = Scaler(context)
+
         // Generate weather class predictions
-        val hourlyWeatherModelOutput = predictWeatherClass(hourlyWeatherModelInput, weatherModel)
-        val dailyWeatherModelOutput = predictWeatherClass(dailyWeatherModelInput, weatherModel)
+        val hourlyWeatherModelOutput = predictWeatherClass(hourlyWeatherModelInput, weatherModel, weatherClassScaler)
+        val dailyWeatherModelOutput = predictWeatherClass(dailyWeatherModelInput, weatherModel, weatherClassScaler)
 
         // Log weather predictions for debugging
         Log.d("ModelManager", "Hourly Weather Predictions: ${hourlyWeatherModelOutput.joinToString()}")
@@ -150,11 +158,18 @@ object ModelManager {
     }
 
     // Predict weather classification based on model inputs
-    fun predictWeatherClass(modelInputs: Array<FloatArray>, weatherModel: Interpreter): Array<String> {
+    // Order of inputs for weather class model:
+    // temperature (°F), relative_humidity (%), rain (inch)
+    // snowfall (inch), cloud cover (%), visibility (ft)
+    fun predictWeatherClass(modelInputs: Array<FloatArray>, weatherModel: Interpreter, scaler: Scaler): Array<String> {
         val outputShape = weatherModel.getOutputTensor(0).shape()
         val weatherModelOutput = Array(modelInputs.size) { FloatArray(outputShape[1]) }
 
-        weatherModel.run(modelInputs, weatherModelOutput)
+        val scaledInputs = modelInputs.map { input ->
+            scaler.applyScaler(input) // Apply the scaling (standardization) on each input array
+        }.toTypedArray()
+
+        weatherModel.run(scaledInputs, weatherModelOutput)
 
         val predictions = Array(modelInputs.size) { "Unknown Weather" }
 
@@ -170,16 +185,52 @@ object ModelManager {
             }
 
             val mapping = mapOf(
-                0 to "Clear Sky", 1 to "Partly cloudy", 2 to "Partly cloudy",
-                3 to "Partly cloudy", 4 to "Foggy", 5 to "Drizzle", 6 to "Drizzle",
-                7 to "Drizzle", 8 to "Drizzle", 9 to "Drizzle", 10 to "Rain",
-                11 to "Rain", 12 to "Rain", 13 to "Rain", 14 to "Rain",
-                15 to "Rain showers", 16 to "Rain showers", 17 to "Thunderstorm"
+                0 to "Clear Sky", 1 to "Partly cloudy", 2 to "Mostly cloudy",
+                3 to "Cloudy", 4 to "Foggy", 5 to "Drizzle", 6 to "Rain",
+                7 to "Snow", 8 to "Thunderstorm"
             )
 
             predictions[i] = mapping[maxIndex] ?: "Unknown Weather"
         }
 
         return predictions
+    }
+}
+
+class Scaler(context: Context) {    // Very scuffed method to apply the scaler
+    private var means: FloatArray
+    private var scales: FloatArray
+
+    init {
+        val inputStream: InputStream = context.assets.open("scaler_params.json")
+        val inputStreamReader = InputStreamReader(inputStream)
+        val reader = BufferedReader(inputStreamReader)
+
+        val stringBuilder = StringBuilder()
+        var line: String?
+        while (reader.readLine().also { line = it } != null) {
+            stringBuilder.append(line)
+        }
+        val jsonString = stringBuilder.toString()
+        val jsonObject = JSONObject(jsonString)
+
+        val meanArray: JSONArray = jsonObject.getJSONArray("mean")
+        val scaleArray: JSONArray = jsonObject.getJSONArray("scale")
+
+        means = FloatArray(meanArray.length())
+        scales = FloatArray(scaleArray.length())
+
+        for (i in 0 until meanArray.length()) {
+            means[i] = meanArray.getDouble(i).toFloat()
+            scales[i] = scaleArray.getDouble(i).toFloat()
+        }
+    }
+
+    fun applyScaler(inputData: FloatArray): FloatArray {
+        val scaledData = FloatArray(inputData.size)
+        for (i in inputData.indices) {
+            scaledData[i] = (inputData[i] - means[i]) / scales[i]
+        }
+        return scaledData
     }
 }
