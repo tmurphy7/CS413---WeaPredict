@@ -39,6 +39,7 @@ object ModelManager {
 
         // Generate hourly and daily temperature predictions
         val hourlyTempOutput = predictHourlyTemperature(startTime, temperatureModel)
+        // TODO: Need to create 2 arrays, one for high and one for lo
         val dailyTempOutput = predictDailyTemperature(startTime, temperatureModel)
         Log.d("ModelManager", "Start time: $startTime")
         // Log predictions for debugging
@@ -69,6 +70,7 @@ object ModelManager {
             hourlyWeatherDataList[hour] = WeatherManager.WeatherInstance(
                 weather_type = hourlyWeatherModelOutput[hour],
                 temperature_high = hourlyTempOutput[hour].toDouble(),
+                // TODO: Needs to display low temp and not just a duplicate
                 temperature_low = hourlyTempOutput[hour].toDouble()
             )
         }
@@ -142,6 +144,7 @@ object ModelManager {
     }
 
 
+    // TODO: Need to redo so that function returns array of [2, 7] or something like that
     // Predict daily temperature (min/max)
     fun predictDailyTemperature(startTime: Date, temperatureModel: Interpreter): FloatArray {
         val calendar = Calendar.getInstance().apply { time = startTime }
