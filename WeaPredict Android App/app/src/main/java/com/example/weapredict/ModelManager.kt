@@ -40,11 +40,11 @@ object ModelManager {
         // Generate hourly and daily temperature predictions
         val hourlyTempOutput = predictHourlyTemperature(startTime, temperatureModel)
         val dailyTempOutput = predictDailyTemperature(startTime, temperatureModel)
-
+        Log.d("ModelManager", "Start time: $startTime")
         // Log predictions for debugging
         Log.d("ModelManager", "Hourly Temperature Predictions: ${hourlyTempOutput.joinToString()}")
         Log.d("ModelManager", "Daily Temperature Predictions: ${dailyTempOutput.joinToString()}")
-
+        // Log the date and time input for this hour
         // Create inputs for weather classification model
         val hourlyWeatherModelInput = Array(24) { FloatArray(1) }
         val dailyWeatherModelInput = Array(7) { FloatArray(1) }
@@ -110,22 +110,37 @@ object ModelManager {
         val calendar = Calendar.getInstance().apply { time = startTime }
 
         val predictions = FloatArray(24)
+
+        // Set start time to the next full hour if the current time is not an exact hour
+        if (calendar.get(Calendar.MINUTE) > 0) {
+            calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + 1)
+            calendar.set(Calendar.MINUTE, 0)
+        }
+
+        // Generate 24-hour temperature predictions
         for (hour in 0 until 24) {
+            // Set time to the current prediction hour
             calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + hour)
+
+            // Extract year, month, day, and hour for prediction
             val timeFeatures = Array(1) { FloatArray(4) }.apply {
-                this[0][0] = calendar.get(Calendar.HOUR_OF_DAY).toFloat() / 24f
-                this[0][1] = calendar.get(Calendar.DAY_OF_MONTH).toFloat() / 31f
-                this[0][2] = (calendar.get(Calendar.MONTH) + 1).toFloat() / 12f
-                this[0][3] = calendar.get(Calendar.YEAR).toFloat() / 2024f
+                this[0][0] = calendar.get(Calendar.YEAR).toFloat() / 2024f    // Normalizing year
+                this[0][1] = (calendar.get(Calendar.MONTH) + 1).toFloat() / 12f // Normalizing month
+                this[0][2] = calendar.get(Calendar.DAY_OF_MONTH).toFloat() / 31f // Normalizing day
+                this[0][3] = calendar.get(Calendar.HOUR_OF_DAY).toFloat() / 24f  // Normalizing hour
             }
 
+            // Run the model to get the temperature prediction
             val output = Array(1) { FloatArray(1) }
             temperatureModel.run(timeFeatures, output)
+
+            // Store the predicted temperature in the predictions array
             predictions[hour] = output[0][0]
         }
 
         return predictions
     }
+
 
     // Predict daily temperature (min/max)
     fun predictDailyTemperature(startTime: Date, temperatureModel: Interpreter): FloatArray {
