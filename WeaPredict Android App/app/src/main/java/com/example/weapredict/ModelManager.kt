@@ -38,13 +38,14 @@ object ModelManager {
         temperatureModel = loadModelFromAssetsFolder(temperatureModelName, context)
 
         // Generate hourly and daily temperature predictions
-        val hourlyTempOutput = predictHourlyTemperature(startTime, )
-        // TODO: Need to create 2 arrays, one for high and one for lo
-        val dailyTempOutput = predictDailyTemperature(startTime, )
+        val hourlyTempOutput = predictHourlyTemperature(startTime, temperatureModel)
+        val dailyTempOutput = predictDailyTemperature(startTime, temperatureModel)
+
         Log.d("ModelManager", "Start time: $startTime")
         // Log predictions for debugging
         Log.d("ModelManager", "Hourly Temperature Predictions: ${hourlyTempOutput.joinToString()}")
         Log.d("ModelManager", "Daily Temperature Predictions: ${dailyTempOutput.joinToString()}")
+
         // Log the date and time input for this hour
         // Create inputs for weather classification model
         val hourlyWeatherModelInput = Array(24) { FloatArray(1) }
@@ -70,7 +71,6 @@ object ModelManager {
             hourlyWeatherDataList[hour] = WeatherManager.WeatherInstance(
                 weather_type = hourlyWeatherModelOutput[hour],
                 temperature_high = hourlyTempOutput[hour].toDouble(),
-                // TODO: Needs to add low temp and not just a duplicate
                 temperature_low = hourlyTempOutput[hour].toDouble()
             )
         }
@@ -90,7 +90,7 @@ object ModelManager {
         try {
             val tfLiteModel = loadModelFile(modelPath, context)
             val options = Interpreter.Options()
-            return Interpreter(tfLiteModel)
+            return Interpreter(tfLiteModel, options)
         } catch (e: Exception) {
             e.printStackTrace()
             throw RuntimeException("Error loading model: ${e.message}")
@@ -107,78 +107,65 @@ object ModelManager {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    private fun predictHourlyTemperature(startTime: Date): List<Float> {
+    // Predict hourly temperature
+    fun predictHourlyTemperature(startTime: Date, temperatureModel: Interpreter): FloatArray {
         val calendar = Calendar.getInstance().apply { time = startTime }
-        val predictions = mutableListOf<Float>()
+
+        val predictions = FloatArray(24)
+
 
         // Set start time to the next full hour if the current time is not an exact hour
         if (calendar.get(Calendar.MINUTE) > 0) {
-            calendar.add(Calendar.HOUR_OF_DAY, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + 1)
             calendar.set(Calendar.MINUTE, 0)
         }
 
         // Generate 24-hour temperature predictions
-        for (hourOffset in 0 until 24) {
-            calendar.add(Calendar.HOUR_OF_DAY, 1)
+        for (hour in 0 until 24) {
+            // Set time to the current prediction hour
+            calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + hour)
 
-            val inputFeatures = normalizeFeatures(
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DAY_OF_MONTH),
-                calendar.get(Calendar.HOUR_OF_DAY)
-            )
-
-            val output = Array(1) { FloatArray(1) }
-            temperatureModel.run(inputFeatures, output)
-            predictions.add(output[0][0])
-        }
-
-        return predictions
-    }
-
-
-    private fun predictDailyTemperature(startTime: Date): List<Float> {
-        val calendar = Calendar.getInstance().apply { time = startTime }
-        val predictions = mutableListOf<Float>()
-
-        for (dayOffset in 0 until 7) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-            val dailyTemps = mutableListOf<Float>()
-
-            for (hour in 0 until 24 step 6) {
-                val inputFeatures = normalizeFeatures(
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH) + 1,
-                    calendar.get(Calendar.DAY_OF_MONTH),
-                    hour
-                )
-                val output = Array(1) { FloatArray(1) }
-                temperatureModel.run(inputFeatures, output)
-                dailyTemps.add(output[0][0])
+            // Extract year, month, day, and hour for prediction
+            val timeFeatures = Array(1) { FloatArray(4) }.apply {
+                this[0][0] = calendar.get(Calendar.YEAR).toFloat() / 2024f    // Normalizing year
+                this[0][1] = (calendar.get(Calendar.MONTH) + 1).toFloat() / 12f // Normalizing month
+                this[0][2] = calendar.get(Calendar.DAY_OF_MONTH).toFloat() / 31f // Normalizing day
+                this[0][3] = calendar.get(Calendar.HOUR_OF_DAY).toFloat() / 24f  // Normalizing hour
             }
 
-            // Calculate average temperature (min + max) / 2
-            val minTemp = dailyTemps.minOrNull() ?: 0f
-            val maxTemp = dailyTemps.maxOrNull() ?: 0f
-            val avgTemp = (minTemp + maxTemp) / 2
+            // Run the model to get the temperature prediction
+            val output = Array(1) { FloatArray(1) }
+            temperatureModel.run(timeFeatures, output)
 
-            predictions.add(avgTemp)
+            // Store the predicted temperature in the predictions array
+            predictions[hour] = output[0][0]
         }
 
         return predictions
-
-
     }
 
-    private fun normalizeFeatures(year: Int, month: Int, day: Int, hour: Int): Array<FloatArray> {
-        return Array(1) { FloatArray(4) }.apply {
-            this[0][0] = year.toFloat() / 2024f
-            this[0][1] = month.toFloat() / 12f
-            this[0][2] = day.toFloat() / 31f
-            this[0][3] = hour.toFloat() / 24f
+
+    // Predict daily temperature (min/max)
+    fun predictDailyTemperature(startTime: Date, temperatureModel: Interpreter): FloatArray {
+        val calendar = Calendar.getInstance().apply { time = startTime }
+
+        val predictions = FloatArray(7)
+        for (day in 0 until 7) {
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + day)
+            val timeFeatures = Array(1) { FloatArray(4) }.apply {
+                this[0][0] = 0f  // Placeholder value for hour, daily model
+                this[0][1] = calendar.get(Calendar.DAY_OF_MONTH).toFloat() / 31f
+                this[0][2] = (calendar.get(Calendar.MONTH) + 1).toFloat() / 12f
+                this[0][3] = calendar.get(Calendar.YEAR).toFloat() / 2024f
+            }
+
+            val output = Array(1) { FloatArray(1) }
+            temperatureModel.run(timeFeatures, output)
+            predictions[day] = output[0][0]
         }
-    }
 
+        return predictions
+    }
 
     // Predict weather classification based on model inputs
     fun predictWeatherClass(modelInputs: Array<FloatArray>, weatherModel: Interpreter): Array<String> {
