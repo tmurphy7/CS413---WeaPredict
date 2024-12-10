@@ -265,7 +265,7 @@ object ModelManager {
             }
 
             val mapping = mapOf(
-                0 to "Clear Sky", 1 to "Partly cloudy", 2 to "Partly cloudy",
+                0 to "Clear sky", 1 to "Partly cloudy", 2 to "Partly cloudy",
                 3 to "Partly cloudy", 4 to "Foggy", 5 to "Drizzle", 6 to "Drizzle",
                 7 to "Drizzle", 8 to "Drizzle", 9 to "Drizzle", 10 to "Rain",
                 11 to "Rain", 12 to "Rain", 13 to "Rain", 14 to "Rain",

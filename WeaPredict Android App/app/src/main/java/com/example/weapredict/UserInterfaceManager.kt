@@ -1,5 +1,6 @@
 package com.example.weapredict
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -106,15 +107,12 @@ object UserInterfaceManager {
 
         // Get information needed for sunrise/sunset
         val sunriseTime = additionalWeatherData.sunrise // Formatted as string, XX:XX
-        val sunriseHour =
-            sunriseTime.split(":")[0].toInt() // Just the first integer (01:39 becomes 1)
+        val sunriseHour = sunriseTime.split(":")[0].toInt() // Just the first integer (01:39 becomes 1)
         val sunsetTime = additionalWeatherData.sunset
         val sunsetHour = sunsetTime.split(":")[0].toInt()
 
         // Prepare to create UI object
         val weatherObjectHourList = getHours(currentWeatherData, hourlyWeatherDataList)
-        var sunriseNotWritten = true
-        var sunsetNotWritten = true
         var isCurrentlyDaytime = WeatherManager.isDaytime(
             sunriseHour,
             sunsetHour,
@@ -126,13 +124,12 @@ object UserInterfaceManager {
                 .horizontalScroll(rememberScrollState())
                 .fillMaxWidth()
         ) {
-
             var i = 0
             while (i < 24) {
                 val hour = weatherObjectHourList[i]
                 val hourInt = convertHourToInteger(hour.hour)
 
-                if (hourInt == sunriseHour + 1 && sunriseNotWritten) // If the sunrise needs to be printed
+                if (hourInt == sunriseHour + 1) // If the sunrise needs to be printed
                 {
                     val sunriseImage = getDrawableWeatherImage("Sunrise", true)
 
@@ -160,9 +157,8 @@ object UserInterfaceManager {
                             modifier = Modifier.padding(8.dp)
                         )
                     }
-                    sunriseNotWritten = false
                     isCurrentlyDaytime = true
-                } else if (hourInt == sunsetHour + 1 && sunsetNotWritten) {
+                } else if (hourInt == sunsetHour + 1) {
                     val sunsetImage = getDrawableWeatherImage("Sunset", true)
 
                     Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -189,39 +185,37 @@ object UserInterfaceManager {
                             modifier = Modifier.padding(8.dp)
                         )
                     }
-                    sunsetNotWritten = false
                     isCurrentlyDaytime = false
-                } else // Just print the hour as usual
-                {
-                    val weatherCondition =
-                        getDrawableWeatherImage(hour.weather_type, isCurrentlyDaytime)
+                }
 
-                    Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = hour.hour,
-                            color = FontAndColorManager.minorTextColor,
-                            fontFamily = syncopateFont,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                        Box(modifier = Modifier.height(50.dp)) {
-                            Image(
-                                modifier = Modifier.size(60.dp),
-                                contentDescription = "Weather Image",
-                                contentScale = ContentScale.Crop,
-                                painter = painterResource(weatherCondition)
-                            )
-                        }
-                        Text(
-                            text = hour.temperature_high.toString() + "\u00B0",
-                            color = FontAndColorManager.minorTextColor,
-                            fontFamily = lexendDecaFont,
-                            fontWeight = FontWeight.Light,
-                            modifier = Modifier.padding(8.dp)
+                Log.d("DEBUG", "It is $isCurrentlyDaytime")
+                val weatherCondition = getDrawableWeatherImage(hour.weather_type, isCurrentlyDaytime)
+
+                Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = hour.hour,
+                        color = FontAndColorManager.minorTextColor,
+                        fontFamily = syncopateFont,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Box(modifier = Modifier.height(50.dp)) {
+                        Image(
+                            modifier = Modifier.size(60.dp),
+                            contentDescription = "Weather Image",
+                            contentScale = ContentScale.Crop,
+                            painter = painterResource(weatherCondition)
                         )
                     }
-                    i++
+                    Text(
+                        text = hour.temperature_high.toString() + "\u00B0",
+                        color = FontAndColorManager.minorTextColor,
+                        fontFamily = lexendDecaFont,
+                        fontWeight = FontWeight.Light,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
+                i++
             }
         }
     }
