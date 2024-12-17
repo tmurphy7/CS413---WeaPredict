@@ -78,18 +78,9 @@ object UserInterfaceManager {
                         text = day.temperature_high.toString() + "°",
                         color = FontAndColorManager.minorTextColor,
                         fontFamily = lexendDecaFont,
-                        fontWeight = FontWeight.Normal,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier
-                            .padding(top = 8.dp)
-                            .fillMaxWidth()
-                    )
-                    Text(
-                        text = day.temperature_low.toString() + "°",
-                        color = FontAndColorManager.minorTextColor,
-                        fontFamily = lexendDecaFont,
-                        fontWeight = FontWeight.Light,
-                        modifier = Modifier
-                            .padding(bottom = 8.dp)
+                            .padding(top = 8.dp, bottom = 8.dp)
                             .fillMaxWidth()
                     )
                 }
@@ -211,7 +202,7 @@ object UserInterfaceManager {
                         text = hour.temperature_high.toString() + "\u00B0",
                         color = FontAndColorManager.minorTextColor,
                         fontFamily = lexendDecaFont,
-                        fontWeight = FontWeight.Light,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
